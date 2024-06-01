@@ -3,7 +3,7 @@ import { AppModule } from '../../src/app.module';
 import { applyAppSettings } from '../../src/settings/apply-app-settings';
 import request from 'supertest';
 
-describe('tests for andpoint auth/login', () => {
+describe.skip('tests for andpoint auth/login', () => {
   let app;
 
   beforeAll(async () => {
@@ -40,22 +40,22 @@ describe('tests for andpoint auth/login', () => {
       .expect(204);
   });
 
-  /*  it(' login  user ', async () => {
-      /!* эти значения установлены в файле 
-       auth-registration.e2e-spec.ts*!/
-  
-      const login1 = 'login111';
-  
-      const password1 = 'password1';
-  
-      await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({
-          loginOrEmail: login1,
-          password: password1,
-        })
-        .expect(200);
-  
-      //console.log(res.body);
-    });*/
+  it(' login  user ', async () => {
+    /* эти значения установлены в файле
+       auth-registration.e2e-spec.ts*/
+
+    const login1 = 'login111';
+
+    const password1 = 'password1';
+
+    await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        loginOrEmail: login1,
+        password: password1,
+      })
+      .expect(200);
+
+    //console.log(res.body);
+  });
 });

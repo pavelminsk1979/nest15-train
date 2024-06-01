@@ -7,6 +7,8 @@ import {
 import { ErrorResponseType, HttpExceptionFilter } from '../exeption-filter';
 
 export const applyAppSettings = (app: INestApplication) => {
+  /*без этой команды при деплое на ВЕРСЕЛ будут
+  падать ошибки */
   app.enableCors();
   /*ДЛЯ СОЗДАНИЯ ГЛОБАЛЬНОГО ПАЙПА
   КОД В АРГУМЕНТЕ --это чтоб если pipe валидация

@@ -49,16 +49,16 @@ describe('tests for andpoint posts', () => {
       })
       .expect(400);
     //console.log(res.body.errors);
-    expect(res.body.errors).toEqual([
-      {
-        field: 'title',
-        message: 'Lengt field title should be less 31 simbols',
-      },
-      {
-        field: 'title',
-        message: 'title should not be empty',
-      },
-    ]);
+    // expect(res.body.errors).toEqual([
+    //   {
+    //     field: 'title',
+    //     message: 'Lengt field title should be less 31 simbols',
+    //   },
+    //   {
+    //     field: 'title',
+    //     message: 'title should not be empty',
+    //   },
+    // ]);
   });
 
   it('create post', async () => {

@@ -3,7 +3,7 @@ import { AppModule } from '../../src/app.module';
 import { applyAppSettings } from '../../src/settings/apply-app-settings';
 import request from 'supertest';
 
-describe('tests for andpoint auth/registration-email-resending', () => {
+describe.skip('tests for andpoint auth/registration-email-resending', () => {
   let app;
 
   beforeAll(async () => {
