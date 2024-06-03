@@ -19,15 +19,16 @@ import { PostQueryRepository } from '../../posts/repositories/post-query-reposit
 import { ViewArrayPosts, ViewPost } from '../../posts/api/types/views';
 import { CreateBlogInputModel } from './pipes/create-blog-input-model';
 import { CreatePostForBlogInputModel } from './pipes/create-post-for-blog-input-model';
-import { DeleteBlogByIdService } from '../services/delete-blog-by-id-service';
+import { DeleteBlogByIdCommand } from '../services/delete-blog-by-id-service';
 import { UpdateBlogService } from '../services/update-blog-service';
 import { CreatePostForBlogService } from '../services/create-post-for-blog-service';
+import { CommandBus } from '@nestjs/cqrs';
 
 @Controller('blogs')
 export class BlogController {
   constructor(
+    protected commandBus: CommandBus,
     protected createBlogService: CreateBlogService,
-    protected deleteBlogByIdService: DeleteBlogByIdService,
     protected updateBlogService: UpdateBlogService,
     protected createPostForBlogService: CreatePostForBlogService,
     protected blogQueryRepository: BlogQueryRepository,
@@ -70,7 +71,9 @@ export class BlogController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   async deleteBlogById(@Param('id') blogId: string) {
-    const isDeleteBlogById = await this.deleteBlogByIdService.execute(blogId);
+    const isDeleteBlogById = await this.commandBus.execute(
+      new DeleteBlogByIdCommand(blogId),
+    );
 
     if (isDeleteBlogById) {
       return;

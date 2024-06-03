@@ -31,6 +31,7 @@ import { EmailSendService } from './common/service/email-send-service';
 import { DeleteBlogByIdService } from './feature/blogs/services/delete-blog-by-id-service';
 import { UpdateBlogService } from './feature/blogs/services/update-blog-service';
 import { CreatePostForBlogService } from './feature/blogs/services/create-post-for-blog-service';
+import { CqrsModule } from '@nestjs/cqrs';
 
 dotenv.config();
 
@@ -50,6 +51,7 @@ dotenv.config();
       их внедрению зависимостей.   */
 @Module({
   imports: [
+    CqrsModule,
     /*  тут подключение к удаленной базе данных ...url aдрес
    этой базы а в конце название конкретного отдела(projectNest)*/
     MongooseModule.forRoot(process.env.MONGO_URL ?? ''),
