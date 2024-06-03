@@ -7,7 +7,16 @@ import { Post, PostDocument } from '../../posts/domains/domain-post';
 import { CreatePostDto } from '../../posts/dto/create-post-dto';
 import { PostRepository } from '../../posts/repositories/post-repository';
 import { CreatePostForBlogInputModel } from '../api/pipes/create-post-for-blog-input-model';
+import { CommandHandler } from '@nestjs/cqrs';
 
+export class CreatePostForBlogCommand {
+  constructor(
+    public blogId: string,
+    public createPostForBlogInputModel: CreatePostForBlogInputModel,
+  ) {}
+}
+
+@CommandHandler(CreatePostForBlogCommand)
 @Injectable()
 export class CreatePostForBlogService {
   constructor(
@@ -16,17 +25,16 @@ export class CreatePostForBlogService {
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
   ) {}
 
-  async execute(
-    blogId: string,
-    createPostForBlogInputModel: CreatePostForBlogInputModel,
-  ) {
-    const { title, content, shortDescription } = createPostForBlogInputModel;
+  async execute(command: CreatePostForBlogCommand) {
+    const { title, content, shortDescription } =
+      command.createPostForBlogInputModel;
 
     /* нужно получить документ блога из базы чтобы взять от него
  поле blogName*/
 
-    const blog: BlogDocument | null =
-      await this.blogRepository.findBlog(blogId);
+    const blog: BlogDocument | null = await this.blogRepository.findBlog(
+      command.blogId,
+    );
 
     if (!blog) return null;
 
@@ -37,7 +45,7 @@ export class CreatePostForBlogService {
       content,
       shortDescription,
       blogName,
-      blogId,
+      command.blogId,
     );
     /* создаю документ post */
     const newPost: PostDocument = new this.postModel(dtoPost);

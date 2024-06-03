@@ -11,7 +11,6 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { CreateBlogService } from '../services/create-blog-service';
 import { BlogQueryRepository } from '../repositories/blog-query-repository';
 import { BlogQueryParams, QueryParamsPostForBlog } from './types/models';
 import { ViewBlog } from './types/views';
@@ -20,17 +19,15 @@ import { ViewArrayPosts, ViewPost } from '../../posts/api/types/views';
 import { CreateBlogInputModel } from './pipes/create-blog-input-model';
 import { CreatePostForBlogInputModel } from './pipes/create-post-for-blog-input-model';
 import { DeleteBlogByIdCommand } from '../services/delete-blog-by-id-service';
-import { UpdateBlogService } from '../services/update-blog-service';
-import { CreatePostForBlogService } from '../services/create-post-for-blog-service';
+import { UpdateBlogCommand } from '../services/update-blog-service';
 import { CommandBus } from '@nestjs/cqrs';
+import { CreatePostForBlogCommand } from '../services/create-post-for-blog-service';
+import { CreateBlogCommand } from '../services/create-blog-service';
 
 @Controller('blogs')
 export class BlogController {
   constructor(
     protected commandBus: CommandBus,
-    protected createBlogService: CreateBlogService,
-    protected updateBlogService: UpdateBlogService,
-    protected createPostForBlogService: CreatePostForBlogService,
     protected blogQueryRepository: BlogQueryRepository,
     protected postQueryRepository: PostQueryRepository,
   ) {}
@@ -40,7 +37,9 @@ export class BlogController {
   async createBlog(
     @Body() createBlogInputModel: CreateBlogInputModel,
   ): Promise<ViewBlog> {
-    const id = await this.createBlogService.execute(createBlogInputModel);
+    const id = await this.commandBus.execute(
+      new CreateBlogCommand(createBlogInputModel),
+    );
 
     const blog = await this.blogQueryRepository.getBlogById(id);
 
@@ -90,9 +89,8 @@ export class BlogController {
     @Param('id') bologId: string,
     @Body() updateBlogInputModel: CreateBlogInputModel,
   ) {
-    const isUpdateBlog = await this.updateBlogService.execute(
-      bologId,
-      updateBlogInputModel,
+    const isUpdateBlog = await this.commandBus.execute(
+      new UpdateBlogCommand(bologId, updateBlogInputModel),
     );
 
     if (isUpdateBlog) {
@@ -110,9 +108,8 @@ export class BlogController {
     @Param('blogId') blogId: string,
     @Body() createPostForBlogInputModel: CreatePostForBlogInputModel,
   ): Promise<ViewPost | null> {
-    const postId: string | null = await this.createPostForBlogService.execute(
-      blogId,
-      createPostForBlogInputModel,
+    const postId: string | null = await this.commandBus.execute(
+      new CreatePostForBlogCommand(blogId, createPostForBlogInputModel),
     );
 
     if (!postId) {
