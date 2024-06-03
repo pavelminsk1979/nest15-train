@@ -11,7 +11,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { BlogService } from '../services/blog-service';
+import { CreateBlogService } from '../services/create-blog-service';
 import { BlogQueryRepository } from '../repositories/blog-query-repository';
 import { BlogQueryParams, QueryParamsPostForBlog } from './types/models';
 import { ViewBlog } from './types/views';
@@ -19,11 +19,17 @@ import { PostQueryRepository } from '../../posts/repositories/post-query-reposit
 import { ViewArrayPosts, ViewPost } from '../../posts/api/types/views';
 import { CreateBlogInputModel } from './pipes/create-blog-input-model';
 import { CreatePostForBlogInputModel } from './pipes/create-post-for-blog-input-model';
+import { DeleteBlogByIdService } from '../services/delete-blog-by-id-service';
+import { UpdateBlogService } from '../services/update-blog-service';
+import { CreatePostForBlogService } from '../services/create-post-for-blog-service';
 
 @Controller('blogs')
 export class BlogController {
   constructor(
-    protected blogService: BlogService,
+    protected createBlogService: CreateBlogService,
+    protected deleteBlogByIdService: DeleteBlogByIdService,
+    protected updateBlogService: UpdateBlogService,
+    protected createPostForBlogService: CreatePostForBlogService,
     protected blogQueryRepository: BlogQueryRepository,
     protected postQueryRepository: PostQueryRepository,
   ) {}
@@ -33,7 +39,7 @@ export class BlogController {
   async createBlog(
     @Body() createBlogInputModel: CreateBlogInputModel,
   ): Promise<ViewBlog> {
-    const id = await this.blogService.createBlog(createBlogInputModel);
+    const id = await this.createBlogService.execute(createBlogInputModel);
 
     const blog = await this.blogQueryRepository.getBlogById(id);
 
@@ -64,7 +70,7 @@ export class BlogController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   async deleteBlogById(@Param('id') blogId: string) {
-    const isDeleteBlogById = await this.blogService.deleteBlogById(blogId);
+    const isDeleteBlogById = await this.deleteBlogByIdService.execute(blogId);
 
     if (isDeleteBlogById) {
       return;
@@ -81,7 +87,7 @@ export class BlogController {
     @Param('id') bologId: string,
     @Body() updateBlogInputModel: CreateBlogInputModel,
   ) {
-    const isUpdateBlog = await this.blogService.updateBlog(
+    const isUpdateBlog = await this.updateBlogService.execute(
       bologId,
       updateBlogInputModel,
     );
@@ -101,7 +107,7 @@ export class BlogController {
     @Param('blogId') blogId: string,
     @Body() createPostForBlogInputModel: CreatePostForBlogInputModel,
   ): Promise<ViewPost | null> {
-    const postId: string | null = await this.blogService.createPostForBlog(
+    const postId: string | null = await this.createPostForBlogService.execute(
       blogId,
       createPostForBlogInputModel,
     );

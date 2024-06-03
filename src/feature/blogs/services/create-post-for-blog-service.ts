@@ -1,52 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Blog, BlogDocument } from '../domains/domain-blog';
-import { CreateBlogDto } from '../dto/create-blog-dto';
+import { BlogDocument } from '../domains/domain-blog';
 import { BlogRepository } from '../repositories/blog-repository';
 import { Post, PostDocument } from '../../posts/domains/domain-post';
 import { CreatePostDto } from '../../posts/dto/create-post-dto';
 import { PostRepository } from '../../posts/repositories/post-repository';
-import { CreateBlogInputModel } from '../api/pipes/create-blog-input-model';
 import { CreatePostForBlogInputModel } from '../api/pipes/create-post-for-blog-input-model';
 
 @Injectable()
-export class BlogService {
+export class CreatePostForBlogService {
   constructor(
-    @InjectModel(Blog.name) private blogModel: Model<BlogDocument>,
     protected blogRepository: BlogRepository,
     protected postRepository: PostRepository,
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
   ) {}
 
-  async createBlog(
-    createBlogInputModel: CreateBlogInputModel,
-  ): Promise<string> {
-    const dtoBlog: CreateBlogDto = new CreateBlogDto(
-      createBlogInputModel.name,
-      createBlogInputModel.description,
-      createBlogInputModel.websiteUrl,
-    );
-
-    const newBlog: BlogDocument = new this.blogModel(dtoBlog);
-
-    const blog: BlogDocument = await this.blogRepository.save(newBlog);
-
-    return blog._id.toString();
-  }
-
-  async deleteBlogById(blogId: string) {
-    return this.blogRepository.deleteBlogById(blogId);
-  }
-
-  async updateBlog(
-    bologId: string,
-    updateBlogInputModel: CreateBlogInputModel,
-  ) {
-    return this.blogRepository.updateBlog(bologId, updateBlogInputModel);
-  }
-
-  async createPostForBlog(
+  async execute(
     blogId: string,
     createPostForBlogInputModel: CreatePostForBlogInputModel,
   ) {

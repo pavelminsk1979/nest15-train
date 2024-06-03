@@ -8,7 +8,7 @@ import { UserQueryRepository } from './feature/users/repositories/user-query-rep
 import { BlogController } from './feature/blogs/api/blog-controller';
 import { Blog, BlogShema } from './feature/blogs/domains/domain-blog';
 import { BlogRepository } from './feature/blogs/repositories/blog-repository';
-import { BlogService } from './feature/blogs/services/blog-service';
+import { CreateBlogService } from './feature/blogs/services/create-blog-service';
 import { BlogQueryRepository } from './feature/blogs/repositories/blog-query-repository';
 import { Post, PostShema } from './feature/posts/domains/domain-post';
 import { PostRepository } from './feature/posts/repositories/post-repository';
@@ -28,6 +28,9 @@ import { AuthController } from './feature/auth/api/auth-controller';
 import { AuthService } from './feature/auth/services/auth-service';
 import { TokenJwtService } from './common/service/token-jwt-service';
 import { EmailSendService } from './common/service/email-send-service';
+import { DeleteBlogByIdService } from './feature/blogs/services/delete-blog-by-id-service';
+import { UpdateBlogService } from './feature/blogs/services/update-blog-service';
+import { CreatePostForBlogService } from './feature/blogs/services/create-post-for-blog-service';
 
 dotenv.config();
 
@@ -76,7 +79,7 @@ dotenv.config();
     UsersService,
     UsersRepository,
     UserQueryRepository,
-    BlogService,
+    CreateBlogService,
     BlogRepository,
     BlogQueryRepository,
     PostRepository,
@@ -87,6 +90,9 @@ dotenv.config();
     AuthService,
     TokenJwtService,
     EmailSendService,
+    DeleteBlogByIdService,
+    UpdateBlogService,
+    CreatePostForBlogService,
   ],
 })
 /*export class AppModule {} в данном контексте
