@@ -95,16 +95,8 @@ export class AuthService {
 
     const code = user.confirmationCode;
 
-    /*    в письме ссылка отбалды написана а по сценарию 
-    рабочего приложения она должна перенапрвить
-        на фронт и в урле будет КОД и тогда фронт сформирует 
-        запрос на подтверждение регистрации с этим кодом
-         */
-
-    const letter = `<h1>Thank for your registration</h1>
- <p>To finish registration please follow the link below:
-     <a href="https://somesite.com/confirm-email?code=${code}">complete registration</a>
- </p>`;
+    const letter: string =
+      await this.emailSendService.createLetterRegistration(code);
 
     /*лучше  обработать ошибку отправки письма*/
     try {
@@ -177,16 +169,8 @@ export class AuthService {
 
     if (!changeUser) return false;
 
-    /*    в письме ссылка отбалды написана а по сценарию
- рабочего приложения она должна перенапрвить
-     на фронт и в урле будет КОД и тогда фронт сформирует
-     запрос на подтверждение регистрации с этим кодом
-      */
-
-    const letter = `<h1>Thank for your registration Email Resending</h1>
- <p>To finish registration please follow the link below:
-     <a href="https://somesite.com/confirm-email?code=${newCode}">complete registration</a>
- </p>`;
+    const letter: string =
+      await this.emailSendService.createLetterRegistrationResending(newCode);
 
     /*лучше  обработать ошибку отправки письма*/
     try {
@@ -223,10 +207,8 @@ export class AuthService {
 
     if (!changeUser) return false;
 
-    const letter = `<h1>Password recovery</h1>
- <p>To finish password recovery please follow the link below:
-     <a href="https://somesite.com/password-recovery?recoveryCode=${newCode}">recovery password</a>
- </p>`;
+    const letter =
+      await this.emailSendService.createLetterRecoveryPassword(newCode);
 
     /*лучше  обработать ошибку отправки письма*/
     try {
