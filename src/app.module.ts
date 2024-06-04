@@ -32,6 +32,8 @@ import { DeleteBlogByIdService } from './feature/blogs/services/delete-blog-by-i
 import { UpdateBlogService } from './feature/blogs/services/update-blog-service';
 import { CreatePostForBlogService } from './feature/blogs/services/create-post-for-blog-service';
 import { CqrsModule } from '@nestjs/cqrs';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import configuration, { ConfigurationType } from './settings/env-configuration';
 
 dotenv.config();
 
@@ -52,9 +54,104 @@ dotenv.config();
 @Module({
   imports: [
     CqrsModule,
-    /*  тут подключение к удаленной базе данных ...url aдрес
-   этой базы а в конце название конкретного отдела(projectNest)*/
-    MongooseModule.forRoot(process.env.MONGO_URL ?? ''),
+    ConfigModule.forRoot({
+      /*   тут указание что модуль регистрируется
+      глобально и доступен всему проекту */
+      isGlobal: true,
+      /* load- настройка в которой указано
+      где сама конфигурация
+       configuration это функция в которой прописана
+      конфигурация */
+      load: [configuration],
+    }),
+
+    /*   метод forRootAsync, предоставляемый модулем
+    MongooseModule из @nestjs/mongoose  используется для асинхронной
+    инициализации   подключения к MongoDB, в отличие от синхронного
+    MongooseModule.forRoot()*/
+    MongooseModule.forRootAsync({
+      /* configService---В приведенном примере, ConfigService
+      используется для получения настроек из конфигурационного
+      объекта, который был определен ранее в приложении
+      в файле  env-configuration*/
+      useFactory: (configService: ConfigService<ConfigurationType, true>) => {
+        /*Метод get() используется для получения
+        значений из конфигурационного объекта*/
+        const environmentSettings = configService.get(
+          'environmentSettings',
+
+          {
+            /* { infer: true } - это опция, которая указывает
+           ConfigService автоматически определять тип 
+           возвращаемого значения*/
+            infer: true,
+          },
+        );
+
+        const databaseSettings = configService.get('databaseSettings', {
+          infer: true,
+        });
+
+        const uri = environmentSettings.isTesting
+          ? databaseSettings.MONGO_CONNECTION_URI_FOR_TESTS
+          : databaseSettings.MONGO_CONNECTION_URI;
+
+        /*возвращает объект с настройками подключения к MongoDB,
+          который будет использоваться модулем MongooseModule*/
+        return {
+          uri: uri,
+        };
+      },
+      /* Этот параметр указывает, что ConfigService должен быть внедрен 
+       в фабричную функцию, чтобы она могла получить 
+       доступ к экземпляру ConfigService*/
+      inject: [ConfigService],
+    }),
+
+    /*   ///////////////////////////////////////////////////
+
+    /!*   метод forRootAsync, предоставляемый модулем
+  MongooseModule из @nestjs/mongoose  используется для асинхронной
+  инициализации   подключения к MongoDB, в отличие от синхронного
+       MongooseModule.forRoot().*!/
+    MongooseModule.forRootAsync({
+      /!*  Здесь мы импортируем ConfigModule, который
+     предоставляет возможность использовать ConfigService
+      для получения значений конфигурации.
+      Это необходимо, чтобы ConfigService был доступен внутри
+      useFactory функции.*!/
+      useFactory: (configService: ConfigService<ConfigurationType, true>) => ({
+        uri: configService.get<string>('databaseSettings.MONGO_CONNECTION_URI'),
+      }),
+      inject: [ConfigService],
+    }),
+
+    /////////////////////////////////////////////////////*/
+
+    /*  /////////////////////////////////////////////
+      MongooseModule.forRootAsync({
+        useFactory: (configService: ConfigService<ConfigurationType, true>) => {
+          const environmentSettings = configService.get('environmentSettings', {
+            infer: true,
+          });
+          const databaseSettings = configService.get('databaseSettings', {
+            infer: true,
+          });
+  
+          const uri = environmentSettings.isTesting
+            ? databaseSettings.MONGO_CONNECTION_URI_FOR_TESTS
+            : databaseSettings.MONGO_CONNECTION_URI;
+          console.log(uri);
+  
+          return {
+            uri: uri,
+          };
+        },
+        inject: [ConfigService],
+      }),
+      
+      /////////////////////////////////////////////////////////*/
+    //...
     /*тут регистрация СХЕМЫ монгусовской модельки*/
     MongooseModule.forFeature([
       {

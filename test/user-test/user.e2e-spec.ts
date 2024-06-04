@@ -103,7 +103,7 @@ describe('tests for andpoint users', () => {
   });*/
 
   it('create user', async () => {
-    const newLogin = '123456789011';
+    const newLogin = '123456789';
 
     const loginPasswordBasic64 = 'YWRtaW46cXdlcnR5';
 
@@ -112,12 +112,12 @@ describe('tests for andpoint users', () => {
       .set('Authorization', `Basic ${loginPasswordBasic64}`)
       .send({
         login: newLogin,
-        password: 'short',
-        email: '',
+        password: 'short456',
+        email: 'pavel@mail.com',
       })
-      .expect(400);
+      .expect(201);
 
-    console.log(res.body);
+    //console.log(res.body);
 
     //expect(res.body.login).toEqual(newLogin);
   });

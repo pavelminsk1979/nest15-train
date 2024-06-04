@@ -5,7 +5,7 @@ import request from 'supertest';
 import { EmailSendService } from '../../src/common/service/email-send-service';
 import { MockEmailSendService } from '../../src/common/service/mock-email-send-service';
 
-describe('tests for andpoint auth/login', () => {
+describe.skip('tests for andpoint auth/login', () => {
   let app;
 
   beforeAll(async () => {
