@@ -1,6 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { applyAppSettings } from './settings/apply-app-settings';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 /* вход в приложение
 тут происходит настройка и запуск приложения
@@ -27,8 +30,13 @@ async function bootstrap() {
 
   /*  После создания экземпляра приложения, вызывается метод listen(),
  который запускает ваше приложение на указанном порту.
- В данном случае, приложение будет слушать порт 3000.*/
-  await app.listen(3000);
+ В данном случае, приложение будет слушать порт 3000 или
+ 3003 если запускать  через start debuger
+ .*/
+  const port = process.env.PORT ?? '';
+  await app.listen(port, () => {
+    console.log(`Application is listen  port ${port}`);
+  });
 }
 
 bootstrap();
