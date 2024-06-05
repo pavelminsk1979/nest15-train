@@ -39,4 +39,17 @@ export class TokenJwtService {
 
     return refreshToken;
   }
+
+  async checkAccessToken(token: string) {
+    try {
+      const result = (await jwt.verify(token, this.secretAccessToken)) as {
+        userId: string;
+      };
+
+      return result.userId;
+    } catch (error) {
+      console.log(' FILE token-jwt-service.ts' + error);
+      return null;
+    }
+  }
 }

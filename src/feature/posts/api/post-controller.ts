@@ -22,6 +22,8 @@ import { ViewArrayComments } from '../../comments/types/views';
 import { CreatePostInputModel } from './pipes/create-post-input-model';
 import { UpdatePostInputModel } from './pipes/update-post-input-model';
 import { AuthGuard } from '../../../common/guard/auth-guard';
+import { CreateCommentForPostInputModel } from './pipes/create-coment-for-post-input-model';
+import { AuthTokenGuard } from '../../../common/guard/auth-token-guard';
 
 @Controller('posts')
 export class PostsController {
@@ -142,5 +144,15 @@ export class PostsController {
           ':method-get,url -posts/postId/comments',
       );
     }
+  }
+
+  @UseGuards(AuthTokenGuard)
+  @HttpCode(HttpStatus.CREATED)
+  @Post(':postId/comments')
+  async createCommentForPost(
+    @Param('postId') postId: string,
+    @Body() createCommentForPostInputModel: CreateCommentForPostInputModel,
+  ) {
+    return { postId, createCommentForPostInputModel };
   }
 }
