@@ -20,7 +20,7 @@ export class EmailSendService {
     });
   }
 
-  async createLetterRegistration(code: string) {
+  createLetterRegistration(code: string) {
     /*    в письме ссылка отбалды написана а по сценарию 
  рабочего приложения она должна перенапрвить
      на фронт и в урле будет КОД и тогда фронт сформирует 
@@ -33,7 +33,7 @@ export class EmailSendService {
     return letter;
   }
 
-  async createLetterRegistrationResending(newCode: string) {
+  createLetterRegistrationResending(newCode: string) {
     const letter = `<h1>Thank for your registration Email Resending</h1>
  <p>To finish registration please follow the link below:
      <a href="https://somesite.com/confirm-email?code=${newCode}">complete registration</a>
@@ -41,7 +41,7 @@ export class EmailSendService {
     return letter;
   }
 
-  async createLetterRecoveryPassword(newCode: string) {
+  createLetterRecoveryPassword(newCode: string) {
     const letter = `<h1>Password recovery</h1>
  <p>To finish password recovery please follow the link below:
      <a href="https://somesite.com/password-recovery?recoveryCode=${newCode}">recovery password</a>

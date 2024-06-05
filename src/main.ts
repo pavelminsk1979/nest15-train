@@ -1,11 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { applyAppSettings } from './settings/apply-app-settings';
-import dotenv from 'dotenv';
 import { ConfigService } from '@nestjs/config';
 import { ConfigurationType } from './settings/env-configuration';
-
-dotenv.config();
+import cookieParser from 'cookie-parser';
 
 /* вход в приложение
 тут происходит настройка и запуск приложения
@@ -23,6 +21,9 @@ async function bootstrap() {
       предоставляет статические методы для создания экземпляра
       приложения*/
   const app = await NestFactory.create(AppModule);
+
+  // Применяем cookieParser
+  app.use(cookieParser());
 
   /*  эта функция в файле   src/settings/apply-app-settings.ts
   и там содержиться код который был ранее в этом

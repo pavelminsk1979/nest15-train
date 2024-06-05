@@ -8,10 +8,16 @@ dotenv.config();
 export class TokenJwtService {
   secretAccessToken: string;
   expirationAccessToken: string;
+  secretRefreshToken: string;
+  expirationRefreshToken: string;
 
   constructor() {
-    this.secretAccessToken = process.env.ACCESSTOKEN_SECRET || 'secret1';
+    this.secretAccessToken =
+      process.env.ACCESSTOKEN_SECRET || 'accessJwtService';
     this.expirationAccessToken = '5m';
+    this.secretRefreshToken =
+      process.env.RefreshTOKEN_SECRET || 'refreshJwtService';
+    this.expirationRefreshToken = '500m';
   }
 
   async createAccessToken(userId: string) {
@@ -22,5 +28,15 @@ export class TokenJwtService {
     );
 
     return accessToken;
+  }
+
+  async createRefreshToken(userId: string) {
+    const refreshToken = await jwt.sign(
+      { userId: userId },
+      this.secretRefreshToken,
+      { expiresIn: this.expirationRefreshToken },
+    );
+
+    return refreshToken;
   }
 }

@@ -6,6 +6,7 @@ import {
   HttpStatus,
   NotFoundException,
   Post,
+  Res,
   UnauthorizedException,
 } from '@nestjs/common';
 import { LoginInputModel } from './pipes/login-input-model';
@@ -15,6 +16,7 @@ import { RegistrationConfirmationInputModel } from './pipes/registration-comfirm
 import { RegistrationEmailResendingInputModel } from './pipes/registration-email-resending-input-model';
 import { PasswordRecoveryInputModel } from './pipes/password-recovery-input-model';
 import { NewPasswordInputModel } from './pipes/new-password-input-model';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -24,12 +26,17 @@ export class AuthController {
   @Post('login')
   async handleLogin(
     @Body() loginInputModel: LoginInputModel,
+    @Res({ passthrough: true }) response: Response,
   ): Promise<{ accessToken: string } | null> {
-    const accessToken: string | null =
+    const result: { accessToken: string; refreshToken: string } | null =
       await this.authService.loginUser(loginInputModel);
 
-    if (accessToken) {
-      return { accessToken };
+    if (result) {
+      response.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: true,
+      });
+      return { accessToken: result.accessToken };
     } else {
       throw new UnauthorizedException(
         "user didn't login:andpoint-post,url-auth/login",
@@ -44,7 +51,7 @@ export class AuthController {
   ) {
     const result: { field: string; res: string } =
       await this.authService.registrationUser(registrationInputModel);
-
+    debugger;
     if (result.res === 'false') {
       throw new BadRequestException([
         {

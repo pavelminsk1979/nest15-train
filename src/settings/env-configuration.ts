@@ -25,7 +25,10 @@ const getConfig = (environmentVariables: EnvironmentVariableType) => {
       PORT: Number.parseInt(environmentVariables.PORT || '3000'),
     },
     authSettings: {
-      ACCESSTOKEN_SECRET: environmentVariables.ACCESSTOKEN_SECRET || 'secret9',
+      ACCESSTOKEN_SECRET:
+        environmentVariables.ACCESSTOKEN_SECRET || 'AccessConfig',
+      RefreshTOKEN_SECRET:
+        environmentVariables.environmentVariables || 'RefreshConfig',
     },
 
     databaseSettings: {
@@ -50,7 +53,7 @@ export default () => {
 
   /*ENV- это переменная у меня в файле .env и это флаг- который даст понять 
   в какой среде выполняется приложение */
-  console.log('process.env.ENV =', environmentVariables.ENV);
+  //console.log('process.env.ENV =', environmentVariables.ENV);
 
   return getConfig(environmentVariables);
 };

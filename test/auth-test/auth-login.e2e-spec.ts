@@ -26,7 +26,7 @@ describe('tests for andpoint auth/login', () => {
     await app.close();
   });
 
-  it('login  user', async () => {
+  it('creat user and login  user', async () => {
     const userManagerForTest = new UserManagerForTest(app);
 
     const login1 = 'login1';
@@ -48,6 +48,19 @@ describe('tests for andpoint auth/login', () => {
     //console.log(res.body);
 
     expect(res.body).toHaveProperty('accessToken');
+    /*    если я положу  refreshToken в куку -вот так
+         response.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: true,
+      });
+        ......это значит он в заголовках
+    
+        свойство res.headers['set-cookie'] содержит
+        массив строк, представляющих заголовки 'Set-Cookie',
+          включая куку 'refreshToken'.*/
+    const allCookies = res.headers['set-cookie'];
+
+    //console.log(allCookies[0].split(';')[0]);
   });
 
   it('No login  user...incorrect loginOrEmail...pipe check', async () => {

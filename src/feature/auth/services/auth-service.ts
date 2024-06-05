@@ -26,15 +26,23 @@ export class AuthService {
   async loginUser(loginInputModel: LoginInputModel) {
     const { loginOrEmail, password } = loginInputModel;
 
+    /*в базе должен быть документ  
+    с приходящим емайлом или логином */
     const user: UserDocument | null =
       await this.usersRepository.findUserByLoginOrEmail(loginOrEmail);
 
     if (!user) return null;
 
+    /*когда USER В БАЗЕ СОЗДАН  тогда  ФЛАГ  FALSE и
+     * отправилось письмо на емайл для подтверждения емайла
+     * и если подтвердит тогда флаг isConfirmed  сменится на true
+     * и только потом можно ЗАЛОГИНИТСЯ */
     if (user.isConfirmed === 'false') return null;
 
     const passwordHash = user.passwordHash;
 
+    /* делаю проверку-- на основании этого пароля 
+     был создан хэш который в данном документе находится */
     const isCorrectPassword = await this.hashPasswordService.checkPassword(
       password,
       passwordHash,
@@ -49,14 +57,31 @@ export class AuthService {
 
     const userId = user._id.toString();
 
+    /* в токен айдишку юзера положу и в  также последней части токена
+    айдишка будет и  плюс секрет- они закодированые будут
+    и когда токен будет приходить на эндпоитнты - тогда айдишку из токена
+    сравню с айдишкой из этогоже токена НО ИЗ ЗАКОДИРОВАНОЙ
+     ЧАСТИ ИБО СЕКРЕТ ТОЛЬКО НА БЭКЕНДЕ --если они совпадают(айдишки)
+     значит можно обращатся на данный эндпоинт и ответ на данный
+     запрос надо отдавать на фронтенд
+      ТАКЖЕ УСТАНАВЛИВАЕТСЯ ВРЕМЯ ПРОТУХАНИЯ ТОКЕНА и также проверяется
+      одновременно с айдишкой-- протух токен или нет
+      ---в базу данных accessToken  не помещаентся
+      --в env файл помещаю СЕКРЕТ токена, можно еще время жизни*/
     const accessToken = await this.tokenJwtService.createAccessToken(userId);
 
     if (!accessToken) return null;
 
-    return accessToken;
+    /* создание  refreshToken  такоеже
+     * то тех заданию ненадо делать обнавления пары
+     * токенов --надо просто вернуть 2 токена на фронтенд */
+    const refreshToken = await this.tokenJwtService.createRefreshToken(userId);
+
+    return { accessToken, refreshToken };
   }
 
   async registrationUser(registrationInputModel: RegistrationInputModel) {
+    debugger;
     const { password, login, email } = registrationInputModel;
 
     /*   login и email  должны быть уникальные--поискать
@@ -95,8 +120,7 @@ export class AuthService {
 
     const code = user.confirmationCode;
 
-    const letter: string =
-      await this.emailSendService.createLetterRegistration(code);
+    const letter: string = this.emailSendService.createLetterRegistration(code);
 
     /*лучше  обработать ошибку отправки письма*/
     try {
@@ -170,7 +194,7 @@ export class AuthService {
     if (!changeUser) return false;
 
     const letter: string =
-      await this.emailSendService.createLetterRegistrationResending(newCode);
+      this.emailSendService.createLetterRegistrationResending(newCode);
 
     /*лучше  обработать ошибку отправки письма*/
     try {
@@ -207,8 +231,7 @@ export class AuthService {
 
     if (!changeUser) return false;
 
-    const letter =
-      await this.emailSendService.createLetterRecoveryPassword(newCode);
+    const letter = this.emailSendService.createLetterRecoveryPassword(newCode);
 
     /*лучше  обработать ошибку отправки письма*/
     try {

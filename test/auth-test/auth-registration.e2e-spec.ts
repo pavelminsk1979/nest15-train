@@ -5,7 +5,7 @@ import request from 'supertest';
 import { EmailSendService } from '../../src/common/service/email-send-service';
 import { MockEmailSendService } from '../../src/common/service/mock-email-send-service';
 
-describe.skip('tests for andpoint auth/login', () => {
+describe('tests for andpoint auth/login', () => {
   let app;
 
   beforeAll(async () => {
@@ -13,7 +13,7 @@ describe.skip('tests for andpoint auth/login', () => {
       imports: [AppModule],
     })
       .overrideProvider(EmailSendService)
-      .useValue(MockEmailSendService)
+      .useValue(new MockEmailSendService())
 
       .compile();
 
