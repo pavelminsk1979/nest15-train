@@ -7,6 +7,8 @@ import { BlogManagerForTest } from '../utils/blog-manager-for-test';
 describe('tests for andpoint blogs', () => {
   let app;
 
+  const loginPasswordBasic64 = 'YWRtaW46cXdlcnR5';
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -29,6 +31,7 @@ describe('tests for andpoint blogs', () => {
   it('should be mistake when create blog', async () => {
     const res = await request(app.getHttpServer())
       .post('/blogs')
+      .set('Authorization', `Basic ${loginPasswordBasic64}`)
       .send({
         name: '',
         description: 'description',
@@ -93,13 +96,14 @@ describe('tests for andpoint blogs', () => {
 
     await request(app.getHttpServer())
       .delete(`/blogs/${idBlog1}`)
-
+      .set('Authorization', `Basic ${loginPasswordBasic64}`)
       .expect(204);
   });
 
   it('NO delete blog ... incorect id  ', async () => {
     await request(app.getHttpServer())
       .delete(`/blogs/66553b9af8e4959d6015b8d`)
+      .set('Authorization', `Basic ${loginPasswordBasic64}`)
 
       .expect(404);
   });
@@ -111,6 +115,7 @@ describe('tests for andpoint blogs', () => {
 
     await request(app.getHttpServer())
       .put(`/blogs/${idBlog2}`)
+      .set('Authorization', `Basic ${loginPasswordBasic64}`)
       .send({
         name: newName,
         description: 'changeDescription',
@@ -132,6 +137,7 @@ describe('tests for andpoint blogs', () => {
 
     await request(app.getHttpServer())
       .post(`/blogs/${idBlog2}/posts`)
+      .set('Authorization', `Basic ${loginPasswordBasic64}`)
       .send({
         title: 'title1',
         shortDescription: 'shortDescription1',

@@ -10,6 +10,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { BlogQueryRepository } from '../repositories/blog-query-repository';
 import { BlogQueryParams, QueryParamsPostForBlog } from './types/models';
@@ -23,6 +24,7 @@ import { UpdateBlogCommand } from '../services/update-blog-service';
 import { CommandBus } from '@nestjs/cqrs';
 import { CreatePostForBlogCommand } from '../services/create-post-for-blog-service';
 import { CreateBlogCommand } from '../services/create-blog-service';
+import { AuthGuard } from '../../../common/guard/auth-guard';
 
 @Controller('blogs')
 export class BlogController {
@@ -32,6 +34,7 @@ export class BlogController {
     protected postQueryRepository: PostQueryRepository,
   ) {}
 
+  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.CREATED)
   @Post()
   async createBlog(
@@ -67,6 +70,7 @@ export class BlogController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   async deleteBlogById(@Param('id') blogId: string) {
@@ -83,6 +87,7 @@ export class BlogController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id')
   async updateBlog(
@@ -102,6 +107,7 @@ export class BlogController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post(':blogId/posts')
   async createPostFortBlog(

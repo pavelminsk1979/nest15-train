@@ -10,6 +10,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { QueryParamsPost } from './types/models';
 import { PostService } from '../services/post-service';
@@ -20,6 +21,7 @@ import { CommentQueryRepository } from '../../comments/reposetories/comment-quer
 import { ViewArrayComments } from '../../comments/types/views';
 import { CreatePostInputModel } from './pipes/create-post-input-model';
 import { UpdatePostInputModel } from './pipes/update-post-input-model';
+import { AuthGuard } from '../../../common/guard/auth-guard';
 
 @Controller('posts')
 export class PostsController {
@@ -29,6 +31,7 @@ export class PostsController {
     protected commentQueryRepository: CommentQueryRepository,
   ) {}
 
+  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.CREATED)
   @Post()
   async createPost(
@@ -84,6 +87,7 @@ export class PostsController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':id')
   async updateBlog(
@@ -104,6 +108,7 @@ export class PostsController {
     }
   }
 
+  @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   async deletePostById(@Param('id') postId: string) {

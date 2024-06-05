@@ -7,6 +7,8 @@ import { BlogManagerForTest } from '../utils/blog-manager-for-test';
 describe('tests for andpoint posts', () => {
   let app;
 
+  const loginPasswordBasic64 = 'YWRtaW46cXdlcnR5';
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -41,6 +43,7 @@ describe('tests for andpoint posts', () => {
 
     const res = await request(app.getHttpServer())
       .post('/posts')
+      .set('Authorization', `Basic ${loginPasswordBasic64}`)
       .send({
         title: '',
         shortDescription: 'shortDescriptionPost',
@@ -68,6 +71,7 @@ describe('tests for andpoint posts', () => {
 
     const res = await request(app.getHttpServer())
       .post('/posts')
+      .set('Authorization', `Basic ${loginPasswordBasic64}`)
       .send({
         title: newTitle,
         shortDescription: 'shortDescriptionPost',
@@ -109,6 +113,7 @@ describe('tests for andpoint posts', () => {
 
     await request(app.getHttpServer())
       .put(`/posts/${idPost1}`)
+      .set('Authorization', `Basic ${loginPasswordBasic64}`)
       .send({
         title: newTitle,
         shortDescription: 'shortDescriptionPost',
@@ -140,7 +145,7 @@ describe('tests for andpoint posts', () => {
 
     await request(app.getHttpServer())
       .delete(`/posts/${idPost1}`)
-
+      .set('Authorization', `Basic ${loginPasswordBasic64}`)
       .expect(204);
   });
 });
