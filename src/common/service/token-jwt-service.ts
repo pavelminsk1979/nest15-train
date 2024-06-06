@@ -1,48 +1,50 @@
 import jwt from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
-import dotenv from 'dotenv';
-
-dotenv.config();
+import { ConfigurationType } from '../../settings/env-configuration';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TokenJwtService {
-  secretAccessToken: string;
   expirationAccessToken: string;
-  secretRefreshToken: string;
   expirationRefreshToken: string;
 
-  constructor() {
-    this.secretAccessToken =
-      process.env.ACCESSTOKEN_SECRET || 'accessJwtService';
+  constructor(private configService: ConfigService<ConfigurationType, true>) {
     this.expirationAccessToken = '5m';
-    this.secretRefreshToken =
-      process.env.RefreshTOKEN_SECRET || 'refreshJwtService';
     this.expirationRefreshToken = '500m';
   }
 
   async createAccessToken(userId: string) {
-    const accessToken = await jwt.sign(
-      { userId: userId },
-      this.secretAccessToken,
-      { expiresIn: this.expirationAccessToken },
+    const secretAccessToken = this.configService.get(
+      'authSettings.ACCESSTOKEN_SECRET',
+      { infer: true },
     );
+    const accessToken = jwt.sign({ userId: userId }, secretAccessToken, {
+      expiresIn: this.expirationAccessToken,
+    });
 
     return accessToken;
   }
 
   async createRefreshToken(userId: string) {
-    const refreshToken = await jwt.sign(
-      { userId: userId },
-      this.secretRefreshToken,
-      { expiresIn: this.expirationRefreshToken },
+    const secretRefreshToken = this.configService.get(
+      'authSettings.RefreshTOKEN_SECRET',
+      { infer: true },
     );
+    const refreshToken = jwt.sign({ userId: userId }, secretRefreshToken, {
+      expiresIn: this.expirationRefreshToken,
+    });
 
     return refreshToken;
   }
 
   async checkAccessToken(token: string) {
     try {
-      const result = (await jwt.verify(token, this.secretAccessToken)) as {
+      const secretAccessToken = this.configService.get(
+        'authSettings.ACCESSTOKEN_SECRET',
+        { infer: true },
+      );
+
+      const result = (await jwt.verify(token, secretAccessToken)) as {
         userId: string;
       };
 
