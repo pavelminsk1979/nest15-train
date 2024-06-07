@@ -25,6 +25,8 @@ export class AuthGuard implements CanActivate {
     if (request.headers['authorization'] === 'Basic YWRtaW46cXdlcnR5') {
       return true;
     } else {
+      /* В Nest.js фреймворке, UnauthorizedException является
+       встроенным классом, который вызывает HTTP-статус код 401*/
       throw new UnauthorizedException();
     }
   }

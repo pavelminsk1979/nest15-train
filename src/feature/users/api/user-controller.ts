@@ -18,6 +18,9 @@ import { UserQueryParams } from './types/models';
 import { CreateUserInputModel } from './pipes/create-user-input-model';
 import { AuthGuard } from '../../../common/guard/auth-guard';
 
+/*подключаю данный ГАРД для всех эндпоинтов user и поэтому
+подключение
+Это Basik авторизация*/
 @UseGuards(AuthGuard)
 @Controller('users')
 /* @Controller()-- декоратор,
@@ -41,6 +44,13 @@ export class UsersController {
     управляемо..только тут прописать
     ЕСЛИ ПО УМОЛЧАНИЮ(не прописывать такой декоратор)
     то код успешный  взависимости от метода post/delete*/
+
+  /*Nest.js автоматически возвращает следующие
+  HTTP-статус коды по умолчанию:
+  post 201,get 200, delete 204, put 200
+  ....
+  а ошибки по умолчанию
+  post 400,get 404, delete 404, put 400*/
   @HttpCode(HttpStatus.CREATED)
   @Post()
   /* ИЗ БОДИ ВОЗМУ ПРИХОДЯЩИЕ ДАННЫЕ
