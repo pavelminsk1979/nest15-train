@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from '../domains/domain-user';
 import { Model, Types } from 'mongoose';
 import { ViewArrayUsers, ViewUser } from '../api/types/views';
-import { QueryParamsUserInputModel } from '../api/pipes/query-params-user-input-model';
+import { QueryParamsInputModel } from '../api/pipes/query-params-input-model';
 
 @Injectable()
 /*@Injectable()-декоратор что данный клас инжектируемый
@@ -26,7 +26,7 @@ export class UserQueryRepository {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-  async getUsers(queryParams: QueryParamsUserInputModel) {
+  async getUsers(queryParams: QueryParamsInputModel) {
     /*   в обьекте queryParams будут для каждого 
     поля уже установленые значения по дефолту
     согласно СВАГЕРУ---устанавливаются они 

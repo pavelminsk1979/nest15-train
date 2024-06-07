@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -16,7 +15,7 @@ import { UsersService } from '../services/user-service';
 import { UserQueryRepository } from '../repositories/user-query-repository';
 import { CreateUserInputModel } from './pipes/create-user-input-model';
 import { AuthGuard } from '../../../common/guard/auth-guard';
-import { QueryParamsUserInputModel } from './pipes/query-params-user-input-model';
+import { QueryParamsInputModel } from './pipes/query-params-input-model';
 
 /*подключаю данный ГАРД для всех эндпоинтов user и поэтому
 подключение
@@ -69,39 +68,34 @@ export class UsersController {
 ошибку словит exeption filter(его надо подключить
 в main. ts)*/
   async createUser(@Body() createUserInputModel: CreateUserInputModel) {
-    const result: { field: string; res: string } =
+    const userId: string =
       await this.usersService.createUser(createUserInputModel);
 
-    if (result.res === 'false') {
-      throw new BadRequestException([
-        {
-          message: `field ${result.field} must be unique`,
-          field: `${result.field}`,
-        },
-      ]);
-    }
+    const user = await this.userQueryRepository.getUserById(userId);
 
-    if (result.field === 'id') {
-      const user = await this.userQueryRepository.getUserById(result.res);
-
-      if (user) {
-        return user;
-      } else {
-        throw new NotFoundException('user not found:andpoint-post,url-users');
-      }
+    if (user) {
+      return user;
+    } else {
+      throw new NotFoundException('user not found:andpoint-post,url-users');
     }
   }
 
   @Get()
-  async getUsers(@Query() queryParams: QueryParamsUserInputModel) {
-    const users = await this.userQueryRepository.getUsers(queryParams);
+  async getUsers(@Query() queryParamsUserInputModel: QueryParamsInputModel) {
+    debugger;
+    console.log('-----------------');
+    console.log(queryParamsUserInputModel);
+    console.log('-----------------');
+    const users = await this.userQueryRepository.getUsers(
+      queryParamsUserInputModel,
+    );
     return users;
   }
 
   /*@Delete(':id')
   --тут id это uriПараметр он в урле и из
     постмана запрос таким будет http://localhost:3000/users/66477c549c39ecbc48a29f70
-    айдишку корректную прописывай иначе будет 500 ошибка */
+    айдишку корректную по длинне  прописывай иначе будет 500 ошибка */
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
@@ -114,6 +108,7 @@ export class UsersController {
     if (isDeleteUserById) {
       return;
     } else {
+      /*соответствует HTTP статус коду 404*/
       throw new NotFoundException(
         'user not found:andpoint-delete,url-users/id',
       );

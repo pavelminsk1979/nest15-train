@@ -25,6 +25,53 @@ describe('tests for andpoint users', () => {
     await app.close();
   });
 
+  const loginPasswordBasic64 = 'YWRtaW46cXdlcnR5';
+
+  it('create user', async () => {
+    const newLogin = '123456789';
+
+    const loginPasswordBasic64 = 'YWRtaW46cXdlcnR5';
+
+    const res = await request(app.getHttpServer())
+      .post('/users')
+      .set('Authorization', `Basic ${loginPasswordBasic64}`)
+      .send({
+        login: newLogin,
+        password: 'short456',
+        email: 'pavel@mail.com',
+      })
+      .expect(201);
+
+    //console.log(res.body);
+
+    expect(res.body.login).toEqual(newLogin);
+  });
+
+  it('ERROR create user,because exist email', async () => {
+    const newLogin = '123456';
+
+    const res = await request(app.getHttpServer())
+      .post('/users')
+      .set('Authorization', `Basic ${loginPasswordBasic64}`)
+      .send({
+        login: newLogin,
+        password: 'short456',
+        email: 'pavel@mail.com',
+      })
+      .expect(400);
+
+    //console.log(res.body);
+  });
+
+  it('get users', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/users?')
+      .set('Authorization', `Basic ${loginPasswordBasic64}`)
+
+      .expect(200);
+    console.log(res.body);
+  });
+
   /*  it('create user', async () => {
     const newLogin = 'login1';
 
@@ -101,24 +148,4 @@ describe('tests for andpoint users', () => {
     //console.log(res.body);
     expect(res.body.items).toHaveLength(0);
   });*/
-
-  it('create user', async () => {
-    const newLogin = '123456789';
-
-    const loginPasswordBasic64 = 'YWRtaW46cXdlcnR5';
-
-    const res = await request(app.getHttpServer())
-      .post('/users')
-      .set('Authorization', `Basic ${loginPasswordBasic64}`)
-      .send({
-        login: newLogin,
-        password: 'short456',
-        email: 'pavel@mail.com',
-      })
-      .expect(201);
-
-    //console.log(res.body);
-
-    //expect(res.body.login).toEqual(newLogin);
-  });
 });

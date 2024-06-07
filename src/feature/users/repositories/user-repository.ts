@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { User, UserDocument } from '../domains/domain-user';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 @Injectable()
 /*@Injectable()-декоратор что данный клас инжектируемый
@@ -48,5 +48,17 @@ export class UsersRepository {
 
   async findUserByEmail(email: string) {
     return this.userModel.findOne({ email });
+  }
+
+  async deleteUserById(userId: string) {
+    const result = await this.userModel.deleteOne({
+      _id: new Types.ObjectId(userId),
+    });
+
+    /*  Переменная result будет содержать обьект и в нем несколько
+      свойств ---использую свойство  deletedCount: число,
+        представляющее количество удаленных документов.
+        и преобразую число в булевое значение */
+    return !!result.deletedCount;
   }
 }

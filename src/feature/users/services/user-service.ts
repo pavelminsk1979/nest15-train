@@ -1,9 +1,8 @@
 import { Model } from 'mongoose';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from '../domains/domain-user';
 import { UsersRepository } from '../repositories/user-repository';
-import { Types } from 'mongoose';
 import { CreateUserInputModel } from '../api/pipes/create-user-input-model';
 import { HashPasswordService } from '../../../common/service/hash-password-service';
 import { v4 as randomCode } from 'uuid';
@@ -41,12 +40,22 @@ export class UsersService {
 
     const isExistLogin = await this.usersRepository.isExistLogin(login);
     if (isExistLogin) {
-      return { field: 'login', res: 'false' };
+      throw new BadRequestException([
+        {
+          message: 'field login must be unique',
+          field: 'login',
+        },
+      ]);
     }
 
     const isExistEmail = await this.usersRepository.isExistEmail(email);
     if (isExistEmail) {
-      return { field: 'email', res: 'false' };
+      throw new BadRequestException([
+        {
+          message: 'field email must be unique',
+          field: 'email',
+        },
+      ]);
     }
 
     const passwordHash = await this.hashPasswordService.generateHash(password);
@@ -74,18 +83,10 @@ export class UsersService {
 
     const user: UserDocument = await this.usersRepository.save(newUser);
 
-    return { field: 'id', res: user._id.toString() };
+    return user._id.toString();
   }
 
   async deleteUserById(userId: string) {
-    const result = await this.userModel.deleteOne({
-      _id: new Types.ObjectId(userId),
-    });
-
-    /*Переменная result будет содержать обьект и в нем несколько
-    свойств ---использую свойство  deletedCount: число,
-     представляющее количество удаленных документов.
-      и преобразую число в булевое значение */
-    return !!result.deletedCount;
+    return this.usersRepository.deleteUserById(userId);
   }
 }
