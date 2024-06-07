@@ -14,9 +14,9 @@ import {
 } from '@nestjs/common';
 import { UsersService } from '../services/user-service';
 import { UserQueryRepository } from '../repositories/user-query-repository';
-import { UserQueryParams } from './types/models';
 import { CreateUserInputModel } from './pipes/create-user-input-model';
 import { AuthGuard } from '../../../common/guard/auth-guard';
+import { QueryParamsUserInputModel } from './pipes/query-params-user-input-model';
 
 /*подключаю данный ГАРД для всех эндпоинтов user и поэтому
 подключение
@@ -93,7 +93,7 @@ export class UsersController {
   }
 
   @Get()
-  async getUsers(@Query() queryParams: UserQueryParams) {
+  async getUsers(@Query() queryParams: QueryParamsUserInputModel) {
     const users = await this.userQueryRepository.getUsers(queryParams);
     return users;
   }

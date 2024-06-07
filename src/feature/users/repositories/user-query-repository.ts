@@ -2,9 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from '../domains/domain-user';
 import { Model, Types } from 'mongoose';
-import { UserViewDto } from '../dto/create-user-view-dto';
-import { UserQueryParams } from '../api/types/models';
 import { ViewArrayUsers, ViewUser } from '../api/types/views';
+import { QueryParamsUserInputModel } from '../api/pipes/query-params-user-input-model';
 
 @Injectable()
 /*@Injectable()-декоратор что данный клас инжектируемый
@@ -27,7 +26,13 @@ export class UserQueryRepository {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-  async getUsers(queryParams: UserQueryParams) {
+  async getUsers(queryParams: QueryParamsUserInputModel) {
+    /*   в обьекте queryParams будут для каждого 
+    поля уже установленые значения по дефолту
+    согласно СВАГЕРУ---устанавливаются они 
+    на входе в ПАЙПЕ -файл query-params-user-input-model.ts
+   */
+
     const {
       sortBy,
       sortDirection,
@@ -37,35 +42,10 @@ export class UserQueryRepository {
       searchEmailTerm,
     } = queryParams;
 
-    /*   в обьекте будут
-       все поля для сортировки даже если
-       их с фронтенда не передадут-будут установлены по умолчанию
-       значения согластно свагеру*/
-    const sort = {
-      sortBy: sortBy ?? 'createdAt',
-      /* Оператор ?? выполняет проверку
-     --если слева значением null или undefined тогда вернет
-      то что справа
-      ---если слева нормальное значение тогда вернет его */
-      sortDirection: sortDirection ?? 'desc',
-      /*  ---Number(queryParams.pageNumber) пытается преобразовать значение  в числовой тип данных
-       ---Если значение не может быть преобразовано в число, то результат будет NaN
-       ----isNaN возвращает true, если переданное значение является NaN
-       ---- присвою  значение 1    или если пришло число
-       тогда присвою приходящее число (В ПАРАМЕТРАХ
-       СТРОКИ ПОЭТОМУ Number() нужно*/
-
-      pageNumber: isNaN(Number(pageNumber)) ? 1 : Number(pageNumber),
-
-      pageSize: isNaN(Number(pageSize)) ? 10 : Number(pageSize),
-      searchLoginTerm: searchLoginTerm ?? null,
-      searchEmailTerm: searchEmailTerm ?? null,
-    };
-
     /* при указании направления сортировки в методе sort(), 
        принимаются только значения 1 и -1.*/
 
-    const sortDirectionValue = sort.sortDirection === 'asc' ? 1 : -1;
+    const sortDirectionValue = sortDirection === 'asc' ? 1 : -1;
 
     //ПРО ФИЛЬТР ЕЩЕ ВНИЗУ этого файла  РАСПИСАЛ
 
@@ -89,19 +69,19 @@ export class UserQueryRepository {
      ---оператор $regex для выполнения поиска по полю login с использованием регулярного выражения. Значение searchLoginTerm используется в качестве шаблона для поиска.
       ---Опция $options: 'i' указывает на регистронезависимый поиск (игнорирование регистра букв)*/
 
-    if (sort.searchLoginTerm) {
+    if (searchLoginTerm) {
       filter.$or.push({
         login: {
-          $regex: sort.searchLoginTerm,
+          $regex: searchLoginTerm,
           $options: 'i',
         },
       });
     }
 
-    if (sort.searchEmailTerm) {
+    if (searchEmailTerm) {
       filter.$or.push({
         email: {
-          $regex: sort.searchEmailTerm,
+          $regex: searchEmailTerm,
           $options: 'i',
         },
       });
@@ -124,18 +104,18 @@ export class UserQueryRepository {
           для определения направления сортировки
            (1 для по возрастанию, -1 для по убыванию).*/
 
-      .sort({ [sort.sortBy]: sortDirectionValue })
+      .sort({ [sortBy]: sortDirectionValue })
 
       /*   skip((sort.pageNumber - 1) * sort.pageSize)
          Пропускаются результаты запроса, чтобы получить страницу с номером sort.pageNumber. Формула
           (sort.pageNumber - 1) * sort.pageSize определяет количество документов, которые нужно пропустить.*/
 
-      .skip((sort.pageNumber - 1) * sort.pageSize)
+      .skip((pageNumber - 1) * pageSize)
 
       /*   .limit(pageSize)
     Ограничивается количество результатов запроса до значения sort.pageSize, чтобы получить определенный размер страницы.*/
 
-      .limit(sort.pageSize)
+      .limit(pageSize)
 
       /*.exec()
     Выполняется запрос к базе данных и возвращается результат*/
@@ -154,10 +134,10 @@ export class UserQueryRepository {
 pagesCount это число
 Вычисляется общее количество страниц путем деления общего количества документов на размер страницы (pageSize), и округление вверх с помощью функции Math.ceil.*/
 
-    const pagesCount: number = Math.ceil(totalCount / sort.pageSize);
+    const pagesCount: number = Math.ceil(totalCount / pageSize);
 
     const arrayUsers: ViewUser[] = users.map((user: UserDocument) => {
-      return UserViewDto.getViewModel(user);
+      return this.createViewModelUser(user);
     });
 
     /* создаю обьект который ожидают на фронте
@@ -169,8 +149,8 @@ pagesCount это число
 
     const viewUsers: ViewArrayUsers = {
       pagesCount,
-      page: sort.pageNumber,
-      pageSize: sort.pageSize,
+      page: pageNumber,
+      pageSize: pageSize,
       totalCount,
       items: arrayUsers,
     };
@@ -183,10 +163,19 @@ pagesCount это число
     });
 
     if (user) {
-      return UserViewDto.getViewModel(user);
+      return this.createViewModelUser(user);
     } else {
       return null;
     }
+  }
+
+  createViewModelUser(user: UserDocument): ViewUser {
+    return {
+      id: user._id.toString(),
+      login: user.login,
+      email: user.email,
+      createdAt: user.createdAt,
+    };
   }
 }
 
