@@ -2,61 +2,48 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model, Types } from 'mongoose';
 import { Blog, BlogDocument } from '../domains/domain-blog';
-import { BlogViewDto } from '../dto/create-blog-view-dto';
-import { BlogQueryParams } from '../api/types/models';
 import { ViewArrayBlog, ViewBlog } from '../api/types/views';
+import { QueryParamsInputModel } from '../../../common/pipes/query-params-input-model';
 
 @Injectable()
 export class BlogQueryRepository {
   constructor(@InjectModel(Blog.name) private blogModel: Model<BlogDocument>) {}
 
-  async getBlogs(queryParamsBlog: BlogQueryParams) {
+  async getBlogs(queryParamsBlog: QueryParamsInputModel) {
     const { searchNameTerm, sortBy, sortDirection, pageNumber, pageSize } =
       queryParamsBlog;
 
-    const sort = {
-      searchNameTerm: searchNameTerm ?? null,
-
-      sortBy: sortBy ?? 'createdAt',
-
-      sortDirection: sortDirection ?? 'desc',
-
-      pageNumber: isNaN(Number(pageNumber)) ? 1 : Number(pageNumber),
-
-      pageSize: isNaN(Number(pageSize)) ? 10 : Number(pageSize),
-    };
-
-    const sortDirectionValue = sort.sortDirection === 'asc' ? 1 : -1;
+    const sortDirectionValue = sortDirection === 'asc' ? 1 : -1;
 
     const filter: { name?: { $regex: string; $options: string } } = {};
 
-    if (sort.searchNameTerm) {
-      filter.name = { $regex: sort.searchNameTerm, $options: 'i' };
+    if (searchNameTerm) {
+      filter.name = { $regex: searchNameTerm, $options: 'i' };
     }
 
     const blogs: BlogDocument[] = await this.blogModel
       .find(filter)
 
-      .sort({ [sort.sortBy]: sortDirectionValue })
+      .sort({ [sortBy]: sortDirectionValue })
 
-      .skip((sort.pageNumber - 1) * sort.pageSize)
+      .skip((pageNumber - 1) * pageSize)
 
-      .limit(sort.pageSize)
+      .limit(pageSize)
 
       .exec();
 
     const totalCount: number = await this.blogModel.countDocuments(filter);
 
-    const pagesCount: number = Math.ceil(totalCount / sort.pageSize);
+    const pagesCount: number = Math.ceil(totalCount / pageSize);
 
     const arrayBlogs: ViewBlog[] = blogs.map((blog: BlogDocument) => {
-      return BlogViewDto.getViewModel(blog);
+      return this.createViewModelBlog(blog);
     });
 
     const viewBlogs: ViewArrayBlog = {
       pagesCount,
-      page: sort.pageNumber,
-      pageSize: sort.pageSize,
+      page: pageNumber,
+      pageSize: pageSize,
       totalCount,
       items: arrayBlogs,
     };
@@ -72,9 +59,20 @@ export class BlogQueryRepository {
     });
 
     if (blog) {
-      return BlogViewDto.getViewModel(blog);
+      return this.createViewModelBlog(blog);
     } else {
       return null;
     }
+  }
+
+  createViewModelBlog(blog: BlogDocument): ViewBlog {
+    return {
+      id: blog._id.toString(),
+      name: blog.name,
+      description: blog.description,
+      websiteUrl: blog.websiteUrl,
+      createdAt: blog.createdAt,
+      isMembership: blog.isMembership,
+    };
   }
 }

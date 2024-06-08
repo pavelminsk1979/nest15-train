@@ -14,23 +14,7 @@ export class DeleteBlogByIdService
 {
   constructor(protected blogRepository: BlogRepository) {}
 
-  async execute(command: DeleteBlogByIdCommand) {
+  async execute(command: DeleteBlogByIdCommand): Promise<boolean | null> {
     return this.blogRepository.deleteBlogById(command.blogId);
   }
 }
-
-/*export class DeleteBlogByIdCommand {
-  constructor(public blogId: string) {}
-}
-
-ТУТ БЕЗ  implements -это для типизации для контроля
-
-@CommandHandler(DeleteBlogByIdCommand)
-@Injectable()
-export class DeleteBlogByIdService {
-  constructor(protected blogRepository: BlogRepository) {}
-
-  async execute(command: DeleteBlogByIdCommand) {
-    return this.blogRepository.deleteBlogById(command.blogId);
-  }
-}*/

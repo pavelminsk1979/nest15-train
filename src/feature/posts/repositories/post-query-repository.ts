@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostDocument } from '../domains/domain-post';
-import { PostViewDto } from '../dto/create-post-view-dto';
-import { ViewArrayPosts, ViewPost } from '../api/types/views';
+import { StatusLike, ViewArrayPosts, ViewPost } from '../api/types/views';
 import { QueryParamsPostForBlog } from '../../blogs/api/types/models';
 
 @Injectable()
@@ -52,7 +51,7 @@ export class PostQueryRepository {
     в обект который на фронтенд отправится*/
 
     const arrayPosts: ViewPost[] = posts.map((post: PostDocument) => {
-      return PostViewDto.getViewModel(post);
+      return this.createViewModelPost(post);
     });
 
     const viewPosts: ViewArrayPosts = {
@@ -113,7 +112,7 @@ export class PostQueryRepository {
     в обект который на фронтенд отправится*/
 
     const arrayPosts: ViewPost[] = posts.map((post: PostDocument) => {
-      return PostViewDto.getViewModel(post);
+      return this.createViewModelPost(post);
     });
 
     const viewPosts: ViewArrayPosts = {
@@ -131,9 +130,33 @@ export class PostQueryRepository {
     const post: PostDocument | null = await this.postModel.findById(postId);
 
     if (post) {
-      return PostViewDto.getViewModel(post);
+      return this.createViewModelPost(post);
     } else {
       return null;
     }
+  }
+
+  createViewModelPost(post: PostDocument): ViewPost {
+    return {
+      id: post._id.toString(),
+      title: post.title,
+      shortDescription: post.shortDescription,
+      content: post.content,
+      blogId: post.blogId,
+      blogName: post.blogName,
+      createdAt: post.createdAt,
+      extendedLikesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: StatusLike.None,
+        newestLikes: [
+          {
+            addedAt: '',
+            userId: '',
+            login: '',
+          },
+        ],
+      },
+    };
   }
 }

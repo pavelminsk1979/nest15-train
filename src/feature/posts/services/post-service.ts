@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BlogDocument } from '../../blogs/domains/domain-blog';
 import { BlogRepository } from '../../blogs/repositories/blog-repository';
-import { CreatePostDto } from '../dto/create-post-dto';
 import { Post, PostDocument } from '../domains/domain-post';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -30,16 +29,15 @@ export class PostService {
 
     const blogName = blog.name;
 
-    const dtoPost: CreatePostDto = new CreatePostDto(
-      title,
-      content,
-      shortDescription,
-      blogName,
-      blogId,
-    );
-
     /* создаю документ post */
-    const newPost: PostDocument = new this.postModel(dtoPost);
+    const newPost: PostDocument = new this.postModel({
+      title,
+      shortDescription,
+      content,
+      blogId,
+      blogName,
+      createdAt: new Date().toISOString(),
+    });
 
     const post: PostDocument = await this.postRepository.save(newPost);
 

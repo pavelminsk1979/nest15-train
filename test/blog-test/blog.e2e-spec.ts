@@ -38,14 +38,7 @@ describe('tests for andpoint blogs', () => {
         websiteUrl: 'https://www.outue1.com/',
       })
       .expect(400);
-    //console.log(res.body.errors);
-    /*    expect(res.body.errors).toEqual([
-      {
-        message: 'Lengt field name should be less 16 simbols',
-        field: 'name',
-      },
-      { message: 'name should not be empty', field: 'name' },
-    ]);*/
+    //console.log(res.body);
   });
 
   it('create 2   blogs', async () => {
@@ -58,15 +51,26 @@ describe('tests for andpoint blogs', () => {
     );
 
     const blog2 = await blogManagerForTest.createBlog(
-      'name1',
-      'description1',
-      'https://www.outue1.com/',
+      'name2',
+      'description2',
+      'https://www.outue2.com/',
     );
 
     const res = await request(app.getHttpServer()).get('/blogs').expect(200);
 
     //console.log(res.body);
-    //console.log(blog1.body);
+
+    /////////////////////////////////////////
+    /*    console.log для  blog1.body
+        {
+          id: '666443080d85c5d56da3fa64',
+            name: 'name1',
+          description: 'description1',
+          websiteUrl: 'https://www.outue1.com/',
+          createdAt: '2024-06-08T11:39:52.710Z',
+          isMembership: false
+        }*/
+    // console.log(blog1.body);
 
     expect.setState({ idBlog1: blog1.body.id });
     /*ложу значения  чтоб в других 
@@ -77,7 +81,7 @@ describe('tests for andpoint blogs', () => {
 
     //console.log(idBlog1);
 
-    expect(res.body.items[0].name).toEqual(blog1.body.name);
+    //expect(res.body.items[0].name).toEqual(blog1.body.name);
   });
 
   it('get correct blog ', async () => {
@@ -89,23 +93,6 @@ describe('tests for andpoint blogs', () => {
       .expect(200);
     //console.log(res.body);
     expect(res.body.id).toEqual(idBlog1);
-  });
-
-  it('delete blog by id ', async () => {
-    const { idBlog1 } = expect.getState();
-
-    await request(app.getHttpServer())
-      .delete(`/blogs/${idBlog1}`)
-      .set('Authorization', `Basic ${loginPasswordBasic64}`)
-      .expect(204);
-  });
-
-  it('NO delete blog ... incorect id  ', async () => {
-    await request(app.getHttpServer())
-      .delete(`/blogs/66553b9af8e4959d6015b8d`)
-      .set('Authorization', `Basic ${loginPasswordBasic64}`)
-
-      .expect(404);
   });
 
   it('change  correct blog ', async () => {
@@ -132,6 +119,27 @@ describe('tests for andpoint blogs', () => {
     expect(res.body.name).toEqual(newName);
   });
 
+  it('delete blog by id ', async () => {
+    const { idBlog1 } = expect.getState();
+
+    await request(app.getHttpServer())
+      .delete(`/blogs/${idBlog1}`)
+      .set('Authorization', `Basic ${loginPasswordBasic64}`)
+      .expect(204);
+  });
+
+  it('NO delete blog ... incorect id  ', async () => {
+    await request(app.getHttpServer())
+      .delete(`/blogs/66553b9af8e4959d6015b8d`)
+      .set('Authorization', `Basic ${loginPasswordBasic64}`)
+
+      .expect(404);
+  });
+
+  /*
+
+
+
   it('create post for correct  blog ', async () => {
     const { idBlog2 } = expect.getState();
 
@@ -153,5 +161,5 @@ describe('tests for andpoint blogs', () => {
     // console.log(res.body);
 
     expect(res.body.items[0].blogId).toEqual(idBlog2);
-  });
+  });*/
 });

@@ -27,10 +27,10 @@ describe('tests for andpoint users', () => {
 
   const loginPasswordBasic64 = 'YWRtaW46cXdlcnR5';
 
+  let userId;
+
   it('create user', async () => {
     const newLogin = '123456789';
-
-    const loginPasswordBasic64 = 'YWRtaW46cXdlcnR5';
 
     const res = await request(app.getHttpServer())
       .post('/users')
@@ -42,12 +42,14 @@ describe('tests for andpoint users', () => {
       })
       .expect(201);
 
-    //console.log(res.body);
+    userId = res.body.id;
+
+    // console.log(res.body);
 
     expect(res.body.login).toEqual(newLogin);
   });
 
-  it('ERROR create user,because exist email', async () => {
+  it(' create user ERROR,because exist email in bd', async () => {
     const newLogin = '123456';
 
     const res = await request(app.getHttpServer())
@@ -63,64 +65,24 @@ describe('tests for andpoint users', () => {
     //console.log(res.body);
   });
 
-  it('get users', async () => {
-    const res = await request(app.getHttpServer())
-      .get('/users?')
-      .set('Authorization', `Basic ${loginPasswordBasic64}`)
-
-      .expect(200);
-    console.log(res.body);
-  });
-
-  /*  it('create user', async () => {
-    const newLogin = 'login1';
-
-    const loginPasswordBasic64 = 'YWRtaW46cXdlcnR5';
+  it(' create user ERROR, because not Basic authorization', async () => {
+    const newLogin = '123456';
 
     const res = await request(app.getHttpServer())
       .post('/users')
-      .set('Authorization', `Basic ${loginPasswordBasic64}`)
       .send({
         login: newLogin,
-        password: 'password1',
-        email: 'pavelPav@mail.ru',
+        password: 'short456',
+        email: 'pavel@mail.com',
       })
-      .expect(201);
+      .expect(401);
 
     //console.log(res.body);
-    expect.setState({
-      login1: newLogin,
-      userId1: res.body.id,
-      loginPasswordBasic64,
-    });
-
-    expect(res.body.login).toEqual(newLogin);
-  });
-
-  it('create user  ... should be mistake ... login exist in bd ', async () => {
-    const { login1, loginPasswordBasic64 } = expect.getState();
-
-    const res = await request(app.getHttpServer())
-      .post('/users')
-      .set('Authorization', `Basic ${loginPasswordBasic64}`)
-      .send({
-        login: login1,
-        password: 'password1',
-        email: 'pavelPav@mail.ru',
-      })
-      .expect(400);
-
-    //console.log(res.body);
-
-    expect(res.body.errors).toEqual([
-      { message: 'field login must be unique', field: 'login' },
-    ]);
   });
 
   it('get users', async () => {
-    const { loginPasswordBasic64 } = expect.getState();
-    await request(app.getHttpServer())
-      .get(`/users`)
+    const res = await request(app.getHttpServer())
+      .get('/users')
       .set('Authorization', `Basic ${loginPasswordBasic64}`)
 
       .expect(200);
@@ -128,24 +90,23 @@ describe('tests for andpoint users', () => {
   });
 
   it('delete  user by id', async () => {
-    const { userId1, loginPasswordBasic64 } = expect.getState();
     await request(app.getHttpServer())
-      .delete(`/users/${userId1}`)
+      .delete(`/users/${userId}`)
       .set('Authorization', `Basic ${loginPasswordBasic64}`)
 
       .expect(204);
-    //console.log(res.body);
   });
 
-  it('get users', async () => {
-    const { loginPasswordBasic64 } = expect.getState();
-
-    const res = await request(app.getHttpServer())
-      .get(`/users`)
-      .set('Authorization', `Basic ${loginPasswordBasic64}`)
-
-      .expect(200);
-    //console.log(res.body);
-    expect(res.body.items).toHaveLength(0);
-  });*/
+  /*  ПОЛОЖИТЬ В ХРАНИЛИЩЕ
+    expect.setState({
+      login1: newLogin,
+      userId1: res.body.id,
+      loginPasswordBasic64,
+    });
+    
+    
+    ДОСТАТЬ ИЗ ХРАНИЛИЩА В ЛЮБЫХ ТЕСТАХ
+    ДАННОГО describe ОКРУЖЕНИЯ 
+    const { login1, loginPasswordBasic64 } = expect.getState();
+    */
 });

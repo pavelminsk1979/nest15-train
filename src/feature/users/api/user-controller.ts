@@ -15,7 +15,7 @@ import { UsersService } from '../services/user-service';
 import { UserQueryRepository } from '../repositories/user-query-repository';
 import { CreateUserInputModel } from './pipes/create-user-input-model';
 import { AuthGuard } from '../../../common/guard/auth-guard';
-import { QueryParamsInputModel } from './pipes/query-params-input-model';
+import { QueryParamsInputModel } from '../../../common/pipes/query-params-input-model';
 
 /*подключаю данный ГАРД для всех эндпоинтов user и поэтому
 подключение
@@ -46,7 +46,7 @@ export class UsersController {
 
   /*Nest.js автоматически возвращает следующие
   HTTP-статус коды по умолчанию:
-  post 201,get 200, delete 204, put 200
+  post 201,get 200, delete 200, put 200
   ....
   а ошибки по умолчанию
   post 400,get 404, delete 404, put 400*/
@@ -76,16 +76,13 @@ export class UsersController {
     if (user) {
       return user;
     } else {
+      /*HTTP-код 404*/
       throw new NotFoundException('user not found:andpoint-post,url-users');
     }
   }
 
   @Get()
   async getUsers(@Query() queryParamsUserInputModel: QueryParamsInputModel) {
-    debugger;
-    console.log('-----------------');
-    console.log(queryParamsUserInputModel);
-    console.log('-----------------');
     const users = await this.userQueryRepository.getUsers(
       queryParamsUserInputModel,
     );
@@ -97,7 +94,9 @@ export class UsersController {
     постмана запрос таким будет http://localhost:3000/users/66477c549c39ecbc48a29f70
     айдишку корректную по длинне  прописывай иначе будет 500 ошибка */
 
-  @HttpCode(HttpStatus.NO_CONTENT)
+  /* @HttpCode(HttpStatus.NO_CONTENT)
+   * * необязательно
+   * ибо метод пост поумолчанию HTTP-статус 204*/
   @Delete(':id')
 
   /*  @Param('id') userId: string---обязательно декоратор добавить

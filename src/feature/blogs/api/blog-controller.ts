@@ -13,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { BlogQueryRepository } from '../repositories/blog-query-repository';
-import { BlogQueryParams, QueryParamsPostForBlog } from './types/models';
+import { QueryParamsPostForBlog } from './types/models';
 import { ViewBlog } from './types/views';
 import { PostQueryRepository } from '../../posts/repositories/post-query-repository';
 import { ViewArrayPosts, ViewPost } from '../../posts/api/types/views';
@@ -25,17 +25,22 @@ import { CommandBus } from '@nestjs/cqrs';
 import { CreatePostForBlogCommand } from '../services/create-post-for-blog-service';
 import { CreateBlogCommand } from '../services/create-blog-service';
 import { AuthGuard } from '../../../common/guard/auth-guard';
+import { QueryParamsInputModel } from '../../../common/pipes/query-params-input-model';
 
 @Controller('blogs')
 export class BlogController {
   constructor(
+    /*это sqrs и service разбит на подчасти
+     * и в каждой отдельный метод
+     * конспект 1501*/
     protected commandBus: CommandBus,
     protected blogQueryRepository: BlogQueryRepository,
     protected postQueryRepository: PostQueryRepository,
   ) {}
 
   @UseGuards(AuthGuard)
-  @HttpCode(HttpStatus.CREATED)
+  /*@HttpCode(HttpStatus.CREATED) необязательно
+   * ибо метод пост поумолчанию HTTP-статус 201 */
   @Post()
   async createBlog(
     @Body() createBlogInputModel: CreateBlogInputModel,
@@ -54,8 +59,10 @@ export class BlogController {
   }
 
   @Get()
-  async getBlogs(@Query() queryParamsBlog: BlogQueryParams) {
-    const blogs = await this.blogQueryRepository.getBlogs(queryParamsBlog);
+  async getBlogs(@Query() queryParamsBlogInputModel: QueryParamsInputModel) {
+    const blogs = await this.blogQueryRepository.getBlogs(
+      queryParamsBlogInputModel,
+    );
     return blogs;
   }
 
@@ -74,7 +81,7 @@ export class BlogController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
   async deleteBlogById(@Param('id') blogId: string) {
-    const isDeleteBlogById = await this.commandBus.execute(
+    const isDeleteBlogById: boolean | null = await this.commandBus.execute(
       new DeleteBlogByIdCommand(blogId),
     );
 
@@ -108,7 +115,6 @@ export class BlogController {
   }
 
   @UseGuards(AuthGuard)
-  @HttpCode(HttpStatus.NO_CONTENT)
   @Post(':blogId/posts')
   async createPostFortBlog(
     @Param('blogId') blogId: string,

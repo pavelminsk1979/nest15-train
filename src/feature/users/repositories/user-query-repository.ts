@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from '../domains/domain-user';
 import { Model, Types } from 'mongoose';
 import { ViewArrayUsers, ViewUser } from '../api/types/views';
-import { QueryParamsInputModel } from '../api/pipes/query-params-input-model';
+import { QueryParamsInputModel } from '../../../common/pipes/query-params-input-model';
 
 @Injectable()
 /*@Injectable()-декоратор что данный клас инжектируемый
