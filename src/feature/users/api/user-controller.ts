@@ -94,9 +94,7 @@ export class UsersController {
     постмана запрос таким будет http://localhost:3000/users/66477c549c39ecbc48a29f70
     айдишку корректную по длинне  прописывай иначе будет 500 ошибка */
 
-  /* @HttpCode(HttpStatus.NO_CONTENT)
-   * * необязательно
-   * ибо метод пост поумолчанию HTTP-статус 204*/
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
 
   /*  @Param('id') userId: string---обязательно декоратор добавить
