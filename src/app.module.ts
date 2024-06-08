@@ -34,6 +34,8 @@ import { CreatePostForBlogService } from './feature/blogs/services/create-post-f
 import { CqrsModule } from '@nestjs/cqrs';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration, { ConfigurationType } from './settings/env-configuration';
+import { CommentService } from './feature/comments/services/comment-service';
+import { CommentRepository } from './feature/comments/reposetories/comment-repository';
 
 dotenv.config();
 
@@ -192,6 +194,8 @@ dotenv.config();
     DeleteBlogByIdService,
     UpdateBlogService,
     CreatePostForBlogService,
+    CommentService,
+    CommentRepository,
   ],
 })
 /*export class AppModule {} в данном контексте

@@ -3,8 +3,7 @@ import { QueryCommentsForPost } from '../types/models';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Comment, CommentDocument } from '../domaims/domain-comment';
-import { ViewArrayComments, ViewComment } from '../types/views';
-import { CommentViewDto } from '../dto/create-comment-view-dto';
+import { StatusLike, ViewArrayComments, ViewComment } from '../types/views';
 
 @Injectable()
 export class CommentQueryRepository {
@@ -85,7 +84,7 @@ export class CommentQueryRepository {
 
     const arrayComments: ViewComment[] = comments.map(
       (comment: CommentDocument) => {
-        return CommentViewDto.getViewModel(comment);
+        return this.createViewModelComment(comment);
       },
     );
 
@@ -101,24 +100,26 @@ export class CommentQueryRepository {
   }
 
   async getCommentById(commentId: string) {
-    let comment: any = await this.commentModel.findById(commentId);
-
-    //////////////////////////////////////////
-    //ЭТО ЗАГЛУШКА ПОКАМЕСТЬ НЕТ ДОКУМЕНТОВ comments
-    if (!comment) {
-      comment = {
-        _id: '664a90ce7edbdddca@@@',
-        content: 'content@',
-        commentatorInfo: { userId: 'userId@', userLogin: 'userLogin1' },
-        createdAt: '2024-05-19T23:52:46.1111',
-      };
-    }
-    ////////////////////////////////////////////
+    const comment = await this.commentModel.findById(commentId);
 
     if (comment) {
-      return CommentViewDto.getViewModel(comment);
+      return this.createViewModelComment(comment);
     } else {
       return null;
     }
+  }
+
+  createViewModelComment(comment: CommentDocument): ViewComment {
+    return {
+      id: comment._id.toString(),
+      content: comment.content,
+      commentatorInfo: comment.commentatorInfo,
+      createdAt: comment.createdAt,
+      likesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: StatusLike.None,
+      },
+    };
   }
 }

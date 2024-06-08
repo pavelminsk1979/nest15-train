@@ -3,6 +3,7 @@ import { Post, PostDocument } from '../domains/domain-post';
 import { Model, Types, UpdateWriteOpResult } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { UpdatePostInputModel } from '../api/pipes/update-post-input-model';
+import { ViewPost } from '../api/types/views';
 
 @Injectable()
 export class PostRepository {
@@ -42,5 +43,9 @@ export class PostRepository {
     });
 
     return !!result.deletedCount;
+  }
+
+  async getPostById(postId: string): Promise<ViewPost | null> {
+    return this.postModel.findById(postId);
   }
 }

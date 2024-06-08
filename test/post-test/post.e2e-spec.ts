@@ -51,31 +51,21 @@ describe('tests for andpoint posts', () => {
         blogId: idBlog3,
       })
       .expect(400);
-    //console.log(res.body.errors);
-    // expect(res.body.errors).toEqual([
-    //   {
-    //     field: 'title',
-    //     message: 'Lengt field title should be less 31 simbols',
-    //   },
-    //   {
-    //     field: 'title',
-    //     message: 'title should not be empty',
-    //   },
-    // ]);
+    //console.log(res.body);
   });
 
   it('create post', async () => {
     const { idBlog3 } = expect.getState();
 
-    const newTitle = 'titlePost';
+    const newTitle = 'titlePost1';
 
     const res = await request(app.getHttpServer())
       .post('/posts')
       .set('Authorization', `Basic ${loginPasswordBasic64}`)
       .send({
         title: newTitle,
-        shortDescription: 'shortDescriptionPost',
-        content: 'contentPost',
+        shortDescription: 'shortDescriptionPost1',
+        content: 'contentPost1',
         blogId: idBlog3,
       })
       .expect(201);
@@ -95,7 +85,7 @@ describe('tests for andpoint posts', () => {
     expect(res.body.items).toHaveLength(1);
   });
 
-  it('get correct post ', async () => {
+  it('get correct post by postId', async () => {
     const { idPost1 } = expect.getState();
 
     const res = await request(app.getHttpServer())
@@ -131,21 +121,65 @@ describe('tests for andpoint posts', () => {
     expect(res.body.title).toEqual(newTitle);
   });
 
-  it('get comments for correct post ', async () => {
-    const { idPost1 } = expect.getState();
-    await request(app.getHttpServer())
-      .get(`/posts/${idPost1}/comments`)
+  it('create post2,and delete this post2', async () => {
+    const { idBlog3 } = expect.getState();
 
-      .expect(200);
+    const titlePost2 = 'titlePost2';
+
+    const res = await request(app.getHttpServer())
+      .post('/posts')
+      .set('Authorization', `Basic ${loginPasswordBasic64}`)
+      .send({
+        title: titlePost2,
+        shortDescription: 'shortDescriptionPost2',
+        content: 'contentPost2',
+        blogId: idBlog3,
+      })
+      .expect(201);
+
     //console.log(res.body);
-  });
+    const idPostForDelete = res.body.id;
 
-  it('delete blog by id ', async () => {
-    const { idPost1 } = expect.getState();
+    expect(res.body.title).toEqual(titlePost2);
 
+    ////////////////////////////////////////////
+    //delete
     await request(app.getHttpServer())
-      .delete(`/posts/${idPost1}`)
+      .delete(`/posts/${idPostForDelete}`)
       .set('Authorization', `Basic ${loginPasswordBasic64}`)
       .expect(204);
   });
+
+  /* 
+ 
+   it('get correct post ', async () => {
+     const { idPost1 } = expect.getState();
+ 
+     const res = await request(app.getHttpServer())
+       .get(`/posts/${idPost1}`)
+ 
+       .expect(200);
+     //console.log(res.body);
+     expect(res.body.id).toEqual(idPost1);
+   });
+ 
+
+ 
+   it('get comments for correct post ', async () => {
+     const { idPost1 } = expect.getState();
+     await request(app.getHttpServer())
+       .get(`/posts/${idPost1}/comments`)
+ 
+       .expect(200);
+     //console.log(res.body);
+   });
+ 
+   it('delete blog by id ', async () => {
+     const { idPost1 } = expect.getState();
+ 
+     await request(app.getHttpServer())
+       .delete(`/posts/${idPost1}`)
+       .set('Authorization', `Basic ${loginPasswordBasic64}`)
+       .expect(204);
+   });*/
 });

@@ -136,14 +136,10 @@ describe('tests for andpoint blogs', () => {
       .expect(404);
   });
 
-  /*
-
-
-
   it('create post for correct  blog ', async () => {
     const { idBlog2 } = expect.getState();
 
-    await request(app.getHttpServer())
+    const res = await request(app.getHttpServer())
       .post(`/blogs/${idBlog2}/posts`)
       .set('Authorization', `Basic ${loginPasswordBasic64}`)
       .send({
@@ -152,14 +148,25 @@ describe('tests for andpoint blogs', () => {
         content: 'content',
       })
 
-      .expect(204);
+      .expect(201);
+
+    /*  const res = await request(app.getHttpServer())
+        .get(`/blogs/${idBlog2}/posts`)
+        .expect(200);*/
+
+    //console.log(res.body);
+
+    expect(res.body.blogId).toEqual(idBlog2);
+  });
+
+  it('get post by correct blogId ', async () => {
+    const { idBlog2 } = expect.getState();
 
     const res = await request(app.getHttpServer())
       .get(`/blogs/${idBlog2}/posts`)
+
       .expect(200);
-
-    // console.log(res.body);
-
+    //console.log(res.body.items);
     expect(res.body.items[0].blogId).toEqual(idBlog2);
-  });*/
+  });
 });

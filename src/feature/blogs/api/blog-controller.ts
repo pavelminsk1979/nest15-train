@@ -13,7 +13,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { BlogQueryRepository } from '../repositories/blog-query-repository';
-import { QueryParamsPostForBlog } from './types/models';
 import { ViewBlog } from './types/views';
 import { PostQueryRepository } from '../../posts/repositories/post-query-repository';
 import { ViewArrayPosts, ViewPost } from '../../posts/api/types/views';
@@ -146,11 +145,11 @@ export class BlogController {
   @Get(':blogId/posts')
   async getPostsForBlog(
     @Param('blogId') blogId: string,
-    @Query() queryParamsPostForBlog: QueryParamsPostForBlog,
+    @Query() queryParamsPostForBlogInputModel: QueryParamsInputModel,
   ): Promise<ViewArrayPosts> {
     const posts = await this.postQueryRepository.getPostsByCorrectBlogId(
       blogId,
-      queryParamsPostForBlog,
+      queryParamsPostForBlogInputModel,
     );
 
     if (posts) {

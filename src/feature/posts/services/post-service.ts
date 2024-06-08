@@ -9,6 +9,13 @@ import { CreatePostInputModel } from '../api/pipes/create-post-input-model';
 import { UpdatePostInputModel } from '../api/pipes/update-post-input-model';
 
 @Injectable()
+/*@Injectable()-декоратор что данный клас
+ инжектируемый--тобишь в него добавляются
+ зависимости
+ * ОБЯЗАТЕЛЬНО ДОБАВЛЯТЬ  В ФАЙЛ app.module
+ * providers: [AppService,UsersService]
+ провайдер-это в том числе компонент котоый
+ возможно внедрить как зависимость*/
 export class PostService {
   constructor(
     protected blogRepository: BlogRepository,

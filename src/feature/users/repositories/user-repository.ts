@@ -61,4 +61,8 @@ export class UsersRepository {
         и преобразую число в булевое значение */
     return !!result.deletedCount;
   }
+
+  async getUserById(userId: string): Promise<UserDocument | null> {
+    return this.userModel.findById(userId);
+  }
 }

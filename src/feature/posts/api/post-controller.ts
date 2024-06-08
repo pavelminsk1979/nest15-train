@@ -10,9 +10,9 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
-import { QueryParamsPost } from './types/models';
 import { PostService } from '../services/post-service';
 import { PostQueryRepository } from '../repositories/post-query-repository';
 import { ViewArrayPosts, ViewPost } from './types/views';
@@ -24,6 +24,10 @@ import { UpdatePostInputModel } from './pipes/update-post-input-model';
 import { AuthGuard } from '../../../common/guard/auth-guard';
 import { CreateCommentForPostInputModel } from './pipes/create-coment-for-post-input-model';
 import { AuthTokenGuard } from '../../../common/guard/auth-token-guard';
+import { QueryParamsInputModel } from '../../../common/pipes/query-params-input-model';
+import { CommentService } from '../../comments/services/comment-service';
+import { Request } from 'express';
+import { CommentDocument } from '../../comments/domaims/domain-comment';
 
 @Controller('posts')
 export class PostsController {
@@ -31,10 +35,12 @@ export class PostsController {
     protected postService: PostService,
     protected postQueryRepository: PostQueryRepository,
     protected commentQueryRepository: CommentQueryRepository,
+    protected commentService: CommentService,
   ) {}
 
   @UseGuards(AuthGuard)
-  @HttpCode(HttpStatus.CREATED)
+  /*  @HttpCode(HttpStatus.CREATED) по умолчанию 201
+    поэтому необязательно это прописывать */
   @Post()
   async createPost(
     @Body() createPostInputModel: CreatePostInputModel,
@@ -63,10 +69,10 @@ export class PostsController {
 
   @Get()
   async getPosts(
-    @Query() queryParamsPost: QueryParamsPost,
+    @Query() queryParamsPostInputModel: QueryParamsInputModel,
   ): Promise<ViewArrayPosts> {
     const posts: ViewArrayPosts | null =
-      await this.postQueryRepository.getPosts(queryParamsPost);
+      await this.postQueryRepository.getPosts(queryParamsPostInputModel);
 
     if (posts) {
       return posts;
@@ -146,13 +152,41 @@ export class PostsController {
     }
   }
 
+  /*для создания КОМЕНТАРИЯ надо чтоб пользователь
+  был залогинен и у него был AccessToken в заголовках
+  AuthTokenGuard сам достанет токен из заголовков
+  и проверку сделает этого токена
+  */
   @UseGuards(AuthTokenGuard)
-  @HttpCode(HttpStatus.CREATED)
   @Post(':postId/comments')
   async createCommentForPost(
     @Param('postId') postId: string,
     @Body() createCommentForPostInputModel: CreateCommentForPostInputModel,
+    @Req() request: Request,
   ) {
-    return { postId, createCommentForPostInputModel };
+    const userId = request['userId'];
+
+    const commentId: string | null = await this.commentService.createComment(
+      userId,
+      postId,
+      createCommentForPostInputModel.content,
+    );
+
+    if (!commentId) {
+      throw new NotFoundException(
+        'comment not create :method-post,url-posts/:postId/comments',
+      );
+    }
+
+    const comment = await this.commentQueryRepository.getCommentById(commentId);
+
+    if (comment) {
+      return comment;
+    } else {
+      /*HTTP-код 404*/
+      throw new NotFoundException(
+        'comment not create :method-post,url-posts/:postId/comments',
+      );
+    }
   }
 }
