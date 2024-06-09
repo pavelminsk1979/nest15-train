@@ -1,6 +1,6 @@
 export class MockEmailSendService {
   async sendEmail(email: string, letter: string) {
-    console.log('MockEmailSendService' + email + letter);
+    //console.log('MockEmailSendService' + email + letter);
   }
 
   createLetterRegistration(code: string) {

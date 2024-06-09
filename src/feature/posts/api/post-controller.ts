@@ -27,7 +27,6 @@ import { AuthTokenGuard } from '../../../common/guard/auth-token-guard';
 import { QueryParamsInputModel } from '../../../common/pipes/query-params-input-model';
 import { CommentService } from '../../comments/services/comment-service';
 import { Request } from 'express';
-import { CommentDocument } from '../../comments/domaims/domain-comment';
 
 @Controller('posts')
 export class PostsController {
@@ -164,8 +163,13 @@ export class PostsController {
     @Body() createCommentForPostInputModel: CreateCommentForPostInputModel,
     @Req() request: Request,
   ) {
+    // когда AccessToken проверяю - тогда
+    // из него достаю userId и помещаю ее в request
+
     const userId = request['userId'];
 
+    //cоздаю в базе документ КОМЕНТ
+    debugger;
     const commentId: string | null = await this.commentService.createComment(
       userId,
       postId,

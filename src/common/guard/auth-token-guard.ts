@@ -10,8 +10,11 @@ import { TokenJwtService } from '../service/token-jwt-service';
 export class AuthTokenGuard implements CanActivate {
   constructor(protected tokenJwtService: TokenJwtService) {}
 
-  /*canActivate определяет  разрешать ли выполнение запроса или нет*/
+  /*canActivate определяет  разрешать ли выполнение запроса или нет
+   * и возвращает булево значение*/
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    debugger;
     const request: Request = context.switchToHttp().getRequest();
 
     /*из request достаю AccessToken*/

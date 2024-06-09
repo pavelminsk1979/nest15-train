@@ -23,7 +23,8 @@ export class CommentService {
   ) {}
 
   async createComment(userId: string, postId: string, content: string) {
-    /*надо проверить существует ли такой post*/
+    /*надо проверить существует ли такой
+    документ-post в базе */
 
     const post = await this.postRepository.getPostById(postId);
 
