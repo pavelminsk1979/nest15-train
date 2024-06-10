@@ -36,6 +36,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import configuration, { ConfigurationType } from './settings/env-configuration';
 import { CommentService } from './feature/comments/services/comment-service';
 import { CommentRepository } from './feature/comments/reposetories/comment-repository';
+import { AuthTokenGuard } from './common/guard/auth-token-guard';
 
 dotenv.config();
 
@@ -196,6 +197,7 @@ dotenv.config();
     CreatePostForBlogService,
     CommentService,
     CommentRepository,
+    AuthTokenGuard,
   ],
 })
 /*export class AppModule {} в данном контексте

@@ -18,7 +18,9 @@ export type CommentDocument = HydratedDocument<Comment>;
 export class Comment {
   @Prop({ required: true })
   content: string;
-  @Prop({ required: true, type: CommentatorInfoShema })
+  /*_id: false, ДЛЯ ВЛОЖЕНОГО ДОКУМЕНТА БУДЕТ ОТКЛЮЧАТЬ
+   * ДОБАВЛЕНИЕ АЙДИШКИ-- ЭТО НАДО ПРОПИСЫВАТЬ*/
+  @Prop({ _id: false, required: true, type: CommentatorInfoShema })
   commentatorInfo: CommentatorInfo;
   @Prop({ required: true })
   createdAt: string;

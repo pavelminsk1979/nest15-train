@@ -27,7 +27,7 @@ export class CommentService {
     документ-post в базе */
 
     const post = await this.postRepository.getPostById(postId);
-
+    debugger;
     if (!post) return null;
 
     /* надо достать документ user по userId
