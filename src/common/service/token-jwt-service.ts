@@ -38,7 +38,6 @@ export class TokenJwtService {
   }
 
   async checkAccessToken(token: string) {
-    debugger;
     try {
       const secretAccessToken = this.configService.get(
         'authSettings.ACCESSTOKEN_SECRET',
@@ -48,7 +47,6 @@ export class TokenJwtService {
       const result = (await jwt.verify(token, secretAccessToken)) as {
         userId: string;
       };
-      debugger;
       return result.userId;
     } catch (error) {
       console.log(' FILE token-jwt-service.ts' + error);

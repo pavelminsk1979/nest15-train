@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { QueryCommentsForPost } from '../types/models';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Comment, CommentDocument } from '../domaims/domain-comment';
 import { StatusLike, ViewArrayComments, ViewComment } from '../types/views';
+import { QueryParamsInputModel } from '../../../common/pipes/query-params-input-model';
 
 @Injectable()
 export class CommentQueryRepository {
@@ -11,87 +11,52 @@ export class CommentQueryRepository {
     @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
   ) {}
 
-  async getComments(
-    postId: string,
-    queryCommentsForPost: QueryCommentsForPost,
-  ) {
-    const { sortBy, sortDirection, pageNumber, pageSize } =
-      queryCommentsForPost;
+  async getComments(postId: string, queryParams: QueryParamsInputModel) {
+    const { sortBy, sortDirection, pageNumber, pageSize } = queryParams;
 
-    const sort = {
-      sortBy: sortBy ?? 'createdAt',
+    const sortDirectionValue = sortDirection === 'asc' ? 1 : -1;
 
-      sortDirection: sortDirection ?? 'desc',
-
-      pageNumber: isNaN(Number(pageNumber)) ? 1 : Number(pageNumber),
-
-      pageSize: isNaN(Number(pageSize)) ? 10 : Number(pageSize),
-    };
-
-    const sortDirectionValue = sort.sortDirection === 'asc' ? 1 : -1;
+    /*  Переменная filter используется для создания фильтра запроса в базу данных MongoDB*/
 
     const filter = { postId };
 
-    //let comments: CommentDocument[] = await this.commentModel
-    ////////////////////////////////////////
-    /*  верхнюю раскоментировать а эту убрать
-      когда добавиться СОЗДАНИЕ КОМЕНТАРИЕВ*/
-    let comments: any = await this.commentModel
-      /////////////////////////////////////
+    const comments: CommentDocument[] = await this.commentModel
 
       .find(filter)
 
-      .sort({ [sort.sortBy]: sortDirectionValue })
+      .sort({ [sortBy]: sortDirectionValue })
 
-      .skip((sort.pageNumber - 1) * sort.pageSize)
+      .skip((pageNumber - 1) * pageSize)
 
-      .limit(sort.pageSize)
+      .limit(pageSize)
 
       .exec();
 
     const totalCount: number = await this.commentModel.countDocuments(filter);
 
-    const pagesCount: number = Math.ceil(totalCount / sort.pageSize);
+    const pagesCount: number = Math.ceil(totalCount / pageSize);
 
-    /* Если в коллекции postModel не будет документов,
-   у которых поле blogId совпадает со значением
- переменной blogId, то метод find вернет пустой
- массив ([]) в переменную posts.*/
+    /* Если в коллекции CommentDocument не будет документов,
+   у которых поле postId заявленое, то метод find вернет пустой
+ массив ([]) */
 
-    // if (comments.length === 0) return null;
-    //////////////////////////////////////////
-    //ЭТО ЗАГЛУШКА ПОКАМЕСТЬ НЕТ ДОКУМЕНТОВ comments
+    /*cоздаю массив коментариев он будет потом помещен
+   в items  */
+
+    let arrayComments: ViewComment[];
+
     if (comments.length === 0) {
-      comments = [
-        {
-          _id: '664a90ce7edbdddca111111',
-          content: 'content1',
-          commentatorInfo: { userId: 'userId1', userLogin: 'userLogin1' },
-          createdAt: '2024-05-19T23:52:46.1111',
-        },
-        {
-          _id: '664a90ce7edbdddca222',
-          content: 'content2',
-          commentatorInfo: { userId: 'userId2', userLogin: 'userLogin2' },
-          createdAt: '2024-05-19T23:52:46.2222',
-        },
-      ];
-    }
-    ////////////////////////////////////////////
-
-    /*cоздаю массив постов-он будет потом помещен
-   в обект который на фронтенд отправится*/
-
-    const arrayComments: ViewComment[] = comments.map(
-      (comment: CommentDocument) => {
+      arrayComments = [];
+    } else {
+      arrayComments = comments.map((comment: CommentDocument) => {
         return this.createViewModelComment(comment);
-      },
-    );
+      });
+    }
 
     const viewComments: ViewArrayComments = {
       pagesCount,
-      page: sort.pageNumber,
-      pageSize: sort.pageSize,
+      page: pageNumber,
+      pageSize: pageSize,
       totalCount,
       items: arrayComments,
     };

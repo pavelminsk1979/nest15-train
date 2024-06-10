@@ -37,6 +37,13 @@ export class BlogController {
     protected postQueryRepository: PostQueryRepository,
   ) {}
 
+  /*Nest.js автоматически возвращает следующие
+  HTTP-статус коды по умолчанию:
+  post 201,get 200, delete 200, put 200
+  ....
+  а ошибки по умолчанию
+  post 400,get 404, delete 404, put 400*/
+
   @UseGuards(AuthGuard)
   /*@HttpCode(HttpStatus.CREATED) необязательно
    * ибо метод пост поумолчанию HTTP-статус 201 */

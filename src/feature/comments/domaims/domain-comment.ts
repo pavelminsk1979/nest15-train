@@ -5,6 +5,7 @@ import { HydratedDocument } from 'mongoose';
 export class CommentatorInfo {
   @Prop({ required: true })
   userId: string;
+
   @Prop({ required: true })
   userLogin: string;
 }
@@ -18,10 +19,15 @@ export type CommentDocument = HydratedDocument<Comment>;
 export class Comment {
   @Prop({ required: true })
   content: string;
+
+  @Prop({ required: true })
+  postId: string;
+
   /*_id: false, ДЛЯ ВЛОЖЕНОГО ДОКУМЕНТА БУДЕТ ОТКЛЮЧАТЬ
    * ДОБАВЛЕНИЕ АЙДИШКИ-- ЭТО НАДО ПРОПИСЫВАТЬ*/
   @Prop({ _id: false, required: true, type: CommentatorInfoShema })
   commentatorInfo: CommentatorInfo;
+
   @Prop({ required: true })
   createdAt: string;
 }

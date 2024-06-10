@@ -8,6 +8,9 @@ import { Request } from 'express';
 import { TokenJwtService } from '../service/token-jwt-service';
 
 @Injectable()
+/*хоть его я не добавляю никуда в constructor но
+ему необходимо добавлять  @Injectable()  и добавлять
+его в app.module.ts в  providers: [AuthTokenGuard*/
 export class AuthTokenGuard implements CanActivate {
   constructor(protected tokenJwtService: TokenJwtService) {}
 
@@ -26,7 +29,7 @@ export class AuthTokenGuard implements CanActivate {
 
     const titleAndAccessToken = authHeader.split(' ');
     //'Bearer lkdjflksdfjlj889765akljfklaj'
-    debugger;
+
     const userId = await this.tokenJwtService.checkAccessToken(
       titleAndAccessToken[1],
     );

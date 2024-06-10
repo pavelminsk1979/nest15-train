@@ -16,7 +16,6 @@ import {
 import { PostService } from '../services/post-service';
 import { PostQueryRepository } from '../repositories/post-query-repository';
 import { ViewArrayPosts, ViewPost } from './types/views';
-import { QueryCommentsForPost } from '../../comments/types/models';
 import { CommentQueryRepository } from '../../comments/reposetories/comment-query-repository';
 import { ViewArrayComments } from '../../comments/types/views';
 import { CreatePostInputModel } from './pipes/create-post-input-model';
@@ -133,7 +132,7 @@ export class PostsController {
   @Get(':postId/comments')
   async getCommentsForPost(
     @Param('postId') postId: string,
-    @Query() queryCommentsForPost: QueryCommentsForPost,
+    @Query() queryCommentsForPost: QueryParamsInputModel,
   ): Promise<ViewArrayComments> {
     const comments: ViewArrayComments | null =
       await this.commentQueryRepository.getComments(
@@ -163,13 +162,13 @@ export class PostsController {
     @Body() createCommentForPostInputModel: CreateCommentForPostInputModel,
     @Req() request: Request,
   ) {
-    // когда AccessToken проверяю - тогда
+    // когда AccessToken проверяю в AuthTokenGuard - тогда
     // из него достаю userId и помещаю ее в request
 
     const userId = request['userId'];
 
     //cоздаю в базе документ КОМЕНТ
-    debugger;
+
     const commentId: string | null = await this.commentService.createComment(
       userId,
       postId,

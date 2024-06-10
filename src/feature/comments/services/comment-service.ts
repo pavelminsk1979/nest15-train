@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PostRepository } from '../../posts/repositories/post-repository';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -27,7 +27,7 @@ export class CommentService {
     документ-post в базе */
 
     const post = await this.postRepository.getPostById(postId);
-    debugger;
+
     if (!post) return null;
 
     /* надо достать документ user по userId
@@ -42,6 +42,7 @@ export class CommentService {
     const newComment: CommentDocument = new this.commentModel({
       content,
       createdAt: new Date().toISOString(),
+      postId,
       commentatorInfo: {
         userId,
         userLogin,
@@ -52,5 +53,47 @@ export class CommentService {
       await this.commentRepository.save(newComment);
 
     return comment._id.toString();
+  }
+
+  async updateComment(userId: string, commentId: string, content: string) {
+    //нахожу коментарий в базе данных
+
+    const comment = await this.commentRepository.findCommentById(commentId);
+
+    if (!comment) return null;
+
+    /*   проверяю что этот коментарий принадлежит
+   пользователю который  хочет его изменить */
+
+    if (comment.commentatorInfo.userId !== userId) {
+      throw new ForbiddenException(
+        'comment not belong current user :method put  ,url /comments/commentId',
+      );
+    }
+
+    /*изменяю в документе comment содержимое
+поля comment*/
+    comment.content = content;
+
+    //сохраняю в базу измененный документ
+
+    return await this.commentRepository.save(comment);
+  }
+
+  async deleteCommentById(userId: string, commentId: string) {
+    const comment = await this.commentRepository.findCommentById(commentId);
+
+    if (!comment) return null;
+
+    /*   проверяю что этот коментарий принадлежит
+   пользователю который  хочет его изменить */
+
+    if (comment.commentatorInfo.userId !== userId) {
+      throw new ForbiddenException(
+        'comment not belong current user :method delete   ,url /comments/commentId',
+      );
+    }
+
+    return this.commentRepository.deleteCommentById(commentId);
   }
 }
