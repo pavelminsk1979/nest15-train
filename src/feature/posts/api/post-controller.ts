@@ -26,6 +26,8 @@ import { AuthTokenGuard } from '../../../common/guard/auth-token-guard';
 import { QueryParamsInputModel } from '../../../common/pipes/query-params-input-model';
 import { CommentService } from '../../comments/services/comment-service';
 import { Request } from 'express';
+import { SetLikeStatusForPostInputModel } from './pipes/set-like-status-input-model';
+import { LikeStatusForPostDocument } from '../../like-status-for-post/domain/domain-like-status-for-post';
 
 @Controller('posts')
 export class PostsController {
@@ -189,6 +191,37 @@ export class PostsController {
       /*HTTP-код 404*/
       throw new NotFoundException(
         'comment not create :method-post,url-posts/:postId/comments',
+      );
+    }
+  }
+
+  @UseGuards(AuthTokenGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Put(':postId/like-status')
+  async setLikeStatus(
+    @Param('postId') postId: string,
+    @Body() likeStatusForPostInputModel: SetLikeStatusForPostInputModel,
+    @Req() request: Request,
+  ) {
+    /* ---лайкСтатус будет конкретного user
+     и для конкретного поста
+     -----лайкСтатус  будет создан новый документ
+     или изменен уже существующий документ*/
+
+    const userId = request['userId'];
+
+    const isSetLikestatusForPost: LikeStatusForPostDocument | null =
+      await this.postService.setLikestatusForPost(
+        userId,
+        postId,
+        likeStatusForPostInputModel.likeStatus,
+      );
+
+    if (isSetLikestatusForPost) {
+      return;
+    } else {
+      throw new NotFoundException(
+        'post not exist :method-put ,url /posts/postId/like-status',
       );
     }
   }

@@ -7,6 +7,12 @@ import { Model } from 'mongoose';
 import { PostRepository } from '../repositories/post-repository';
 import { CreatePostInputModel } from '../api/pipes/create-post-input-model';
 import { UpdatePostInputModel } from '../api/pipes/update-post-input-model';
+import { LikeStatus } from '../../../common/types';
+import { LikeStatusForPostRepository } from '../../like-status-for-post/repositories/like-status-for-post-repository';
+import {
+  LikeStatusForPost,
+  LikeStatusForPostDocument,
+} from '../../like-status-for-post/domain/domain-like-status-for-post';
 
 @Injectable()
 /*@Injectable()-декоратор что данный клас
@@ -21,6 +27,9 @@ export class PostService {
     protected blogRepository: BlogRepository,
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
     protected postRepository: PostRepository,
+    protected likeStatusForPostRepository: LikeStatusForPostRepository,
+    @InjectModel(LikeStatusForPost.name)
+    private likeStatusModelForPost: Model<LikeStatusForPostDocument>,
   ) {}
 
   async createPost(createPostInputModel: CreatePostInputModel) {
@@ -60,5 +69,51 @@ export class PostService {
 
   async deletePostById(postId: string) {
     return this.postRepository.deletePostById(postId);
+  }
+
+  async setLikestatusForPost(
+    userId: string,
+    postId: string,
+    likeStatus: LikeStatus,
+  ) {
+    /* проверка- существует ли в базе такой пост*/
+
+    const postDocument = await this.postRepository.getPostById(postId);
+
+    if (!postDocument) return null;
+
+    /*    ищу в базе ЛайковДляПостов  один документ   по
+             двум полям userData.userId и postId---*/
+
+    const document: LikeStatusForPostDocument | null =
+      await this.likeStatusForPostRepository.findDocumentByUserIdAndPostId(
+        userId,
+        postId,
+      );
+
+    if (!document) {
+      /*Если документа  нет тогда надо cоздать
+      новый документ и добавить в базу*/
+
+      const newLikeStatusForPost: LikeStatusForPostDocument =
+        new this.likeStatusModelForPost({
+          userId,
+          postId,
+          likeStatus,
+          addedAt: new Date().toISOString(),
+        });
+
+      return await this.likeStatusForPostRepository.save(newLikeStatusForPost);
+    }
+
+    /*Если документ есть тогда надо изменить
+     statusLike в нем на приходящий и установить теперещнюю дату
+      установки */
+
+    document.likeStatus = likeStatus;
+
+    document.addedAt = new Date().toISOString();
+
+    return await this.likeStatusForPostRepository.save(document);
   }
 }

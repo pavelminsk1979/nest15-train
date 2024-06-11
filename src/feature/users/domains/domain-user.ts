@@ -1,5 +1,5 @@
-import { HydratedDocument } from 'mongoose';
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { HydratedDocument, Model } from 'mongoose';
+import { InjectModel, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 /*описана типизация умного обьекта  полученный
  с помощью Mongoose
  такой типизацией можно типизировать документ
@@ -58,3 +58,24 @@ export class User {
 /*ТУТ В АРГУМЕНТ ПОМЕЩАЕТСЯ КЛАСС User  и в переменную
 UserSchema  получаю СХЕМУ*/
 export const UserSchema = SchemaFactory.createForClass(User);
+
+/*
+
+для использования модельки или для использования документа созданого
+моделькой  в классе в котором использовать хочу
+добавить в конструктор
+
+export class UsersRepository {
+
+  constructor(
+     вот тут моделька инжектится
+    именно декоратор  @InjectModel
+      -- (User.name)  регистрируется по имени
+       также как в   app.module  в  imports
+      ---userModel - это  свойство текущего класса ,
+       это и будет  Моделька от mongoose и ниже в классе
+       ее и буду использовать  примерно так -
+       - await this.userModel.deleteOne.
+
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+  ) {}*/

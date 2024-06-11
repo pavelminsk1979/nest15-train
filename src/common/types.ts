@@ -3,3 +3,11 @@ export enum SortDirection {
 
   DESC = 'desc',
 }
+
+export enum LikeStatus {
+  NONE = 'None',
+
+  LIKE = 'Like',
+
+  DISLIKE = 'Dislike ',
+}

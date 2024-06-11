@@ -37,6 +37,11 @@ import configuration, { ConfigurationType } from './settings/env-configuration';
 import { CommentService } from './feature/comments/services/comment-service';
 import { CommentRepository } from './feature/comments/reposetories/comment-repository';
 import { AuthTokenGuard } from './common/guard/auth-token-guard';
+import {
+  LikeStatusForPost,
+  LikeStatusForPostShema,
+} from './feature/like-status-for-post/domain/domain-like-status-for-post';
+import { LikeStatusForPostRepository } from './feature/like-status-for-post/repositories/like-status-for-post-repository';
 
 dotenv.config();
 
@@ -165,6 +170,7 @@ dotenv.config();
       { name: Blog.name, schema: BlogShema },
       { name: Post.name, schema: PostShema },
       { name: Comment.name, schema: CommentShema },
+      { name: LikeStatusForPost.name, schema: LikeStatusForPostShema },
     ]),
   ],
   /*все контроллеры приложения должны тут добавлены */
@@ -198,6 +204,7 @@ dotenv.config();
     CommentService,
     CommentRepository,
     AuthTokenGuard,
+    LikeStatusForPostRepository,
   ],
 })
 /*export class AppModule {} в данном контексте
