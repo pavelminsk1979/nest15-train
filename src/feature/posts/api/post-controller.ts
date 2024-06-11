@@ -198,7 +198,7 @@ export class PostsController {
   @UseGuards(AuthTokenGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':postId/like-status')
-  async setLikeStatus(
+  async setLikeStatusForPost(
     @Param('postId') postId: string,
     @Body() likeStatusForPostInputModel: SetLikeStatusForPostInputModel,
     @Req() request: Request,

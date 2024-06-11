@@ -16,6 +16,8 @@ import { AuthTokenGuard } from '../../../common/guard/auth-token-guard';
 import { UpdateCorrectCommentInputModel } from './pipe/update-correct-comment';
 import { CommentService } from '../services/comment-service';
 import { Request } from 'express';
+import { SetLikeStatusForCommentInputModel } from './pipe/set-like-status-for-comment-input-model';
+import { LikeStatusForCommentDocument } from '../../like-status-for-comment/domain/domain-like-status-for-comment';
 
 @Controller('comments')
 export class CommentController {
@@ -85,6 +87,37 @@ export class CommentController {
       /*соответствует HTTP статус коду 404*/
       throw new NotFoundException(
         'comment  not found:method-delete,url-comment/commentId',
+      );
+    }
+  }
+
+  @UseGuards(AuthTokenGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Put(':commentId/like-status')
+  async setLikeStatusForComment(
+    @Param('commentId') commentId: string,
+    @Body() likeStatusForCommentInputModel: SetLikeStatusForCommentInputModel,
+    @Req() request: Request,
+  ) {
+    /* ---лайкСтатус будет конкретного user
+     и для конкретного КОМЕНТАРИЯ
+     -----лайкСтатус  будет создан новый документ
+     или изменен уже существующий документ*/
+
+    const userId = request['userId'];
+
+    const isSetLikestatusForComment: LikeStatusForCommentDocument | null =
+      await this.commentService.setLikestatusForComment(
+        userId,
+        commentId,
+        likeStatusForCommentInputModel.likeStatus,
+      );
+
+    if (isSetLikestatusForComment) {
+      return;
+    } else {
+      throw new NotFoundException(
+        'comment not exist :method-put ,url /commens/commentId/like-status',
       );
     }
   }

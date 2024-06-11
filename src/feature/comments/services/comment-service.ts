@@ -5,6 +5,12 @@ import { Model } from 'mongoose';
 import { Comment, CommentDocument } from '../domaims/domain-comment';
 import { UsersRepository } from '../../users/repositories/user-repository';
 import { CommentRepository } from '../reposetories/comment-repository';
+import { LikeStatus } from '../../../common/types';
+import {
+  LikeStatusForComment,
+  LikeStatusForCommentDocument,
+} from '../../like-status-for-comment/domain/domain-like-status-for-comment';
+import { LikeStatusForCommentRepository } from '../../like-status-for-comment/repositories/like-status-for-comment-repository';
 
 @Injectable()
 /*@Injectable()-декоратор что данный клас
@@ -20,6 +26,9 @@ export class CommentService {
     protected commentRepository: CommentRepository,
     protected usersRepository: UsersRepository,
     @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
+    protected likeStatusForCommentRepository: LikeStatusForCommentRepository,
+    @InjectModel(LikeStatusForComment.name)
+    private likeStatusModelForComment: Model<LikeStatusForCommentDocument>,
   ) {}
 
   async createComment(userId: string, postId: string, content: string) {
@@ -95,5 +104,54 @@ export class CommentService {
     }
 
     return this.commentRepository.deleteCommentById(commentId);
+  }
+
+  async setLikestatusForComment(
+    userId: string,
+    commentId: string,
+    likeStatus: LikeStatus,
+  ) {
+    /* проверка- существует ли в базе такой коментарий*/
+
+    const commentDocument =
+      await this.commentRepository.findCommentById(commentId);
+
+    if (!commentDocument) return null;
+
+    /*    ищу в базе ЛайковДляКоментариев  один документ   по
+             двум полям userId и commentId---*/
+
+    const document: LikeStatusForCommentDocument | null =
+      await this.likeStatusForCommentRepository.findDocumentByUserIdAndCommentId(
+        userId,
+        commentId,
+      );
+
+    if (!document) {
+      /*Если документа  нет тогда надо cоздать
+      новый документ и добавить в базу*/
+
+      const newLikeStatusForComment: LikeStatusForCommentDocument =
+        new this.likeStatusModelForComment({
+          userId,
+          commentId,
+          likeStatus,
+          addedAt: new Date().toISOString(),
+        });
+
+      return await this.likeStatusForCommentRepository.save(
+        newLikeStatusForComment,
+      );
+    }
+
+    /*Если документ есть тогда надо изменить
+     statusLike в нем на приходящий и установить теперещнюю дату
+      установки */
+
+    document.likeStatus = likeStatus;
+
+    document.addedAt = new Date().toISOString();
+
+    return await this.likeStatusForCommentRepository.save(document);
   }
 }

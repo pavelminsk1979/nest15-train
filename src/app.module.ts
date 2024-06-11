@@ -42,6 +42,11 @@ import {
   LikeStatusForPostShema,
 } from './feature/like-status-for-post/domain/domain-like-status-for-post';
 import { LikeStatusForPostRepository } from './feature/like-status-for-post/repositories/like-status-for-post-repository';
+import {
+  LikeStatusForComment,
+  LikeStatusForCommentShema,
+} from './feature/like-status-for-comment/domain/domain-like-status-for-comment';
+import { LikeStatusForCommentRepository } from './feature/like-status-for-comment/repositories/like-status-for-comment-repository';
 
 dotenv.config();
 
@@ -171,6 +176,7 @@ dotenv.config();
       { name: Post.name, schema: PostShema },
       { name: Comment.name, schema: CommentShema },
       { name: LikeStatusForPost.name, schema: LikeStatusForPostShema },
+      { name: LikeStatusForComment.name, schema: LikeStatusForCommentShema },
     ]),
   ],
   /*все контроллеры приложения должны тут добавлены */
@@ -205,6 +211,7 @@ dotenv.config();
     CommentRepository,
     AuthTokenGuard,
     LikeStatusForPostRepository,
+    LikeStatusForCommentRepository,
   ],
 })
 /*export class AppModule {} в данном контексте
