@@ -1,9 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Request } from 'express';
 import { TokenJwtService } from '../service/token-jwt-service';
 
@@ -11,7 +6,7 @@ import { TokenJwtService } from '../service/token-jwt-service';
 /*хоть его я не добавляю никуда в constructor но
 ему необходимо добавлять  @Injectable()  и добавлять
 его в app.module.ts в  providers: [AuthTokenGuard*/
-export class AuthTokenGuard implements CanActivate {
+export class DataUserExtractorFromTokenGuard implements CanActivate {
   constructor(protected tokenJwtService: TokenJwtService) {}
 
   /*canActivate определяет  разрешать ли выполнение запроса или нет
@@ -23,21 +18,25 @@ export class AuthTokenGuard implements CanActivate {
     /*из request достаю AccessToken*/
 
     const authHeader = request.headers.authorization;
-    if (!authHeader) {
-      throw new UnauthorizedException();
-    }
 
+    if (!authHeader) {
+      request['userId'] = null;
+      return true;
+    }
     const titleAndAccessToken = authHeader.split(' ');
+
     //'Bearer lkdjflksdfjlj889765akljfklaj'
 
     const userId = await this.tokenJwtService.checkAccessToken(
       titleAndAccessToken[1],
     );
+
     if (userId) {
       request['userId'] = userId;
       return true;
     } else {
-      throw new UnauthorizedException();
+      request['userId'] = null;
+      return true;
     }
   }
 }

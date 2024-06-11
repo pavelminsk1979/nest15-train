@@ -47,6 +47,7 @@ import {
   LikeStatusForCommentShema,
 } from './feature/like-status-for-comment/domain/domain-like-status-for-comment';
 import { LikeStatusForCommentRepository } from './feature/like-status-for-comment/repositories/like-status-for-comment-repository';
+import { DataUserExtractorFromTokenGuard } from './common/guard/data-user-extractor-from-token-guard';
 
 dotenv.config();
 
@@ -210,6 +211,7 @@ dotenv.config();
     CommentService,
     CommentRepository,
     AuthTokenGuard,
+    DataUserExtractorFromTokenGuard,
     LikeStatusForPostRepository,
     LikeStatusForCommentRepository,
   ],

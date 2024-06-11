@@ -23,4 +23,20 @@ export class LikeStatusForPostRepository {
   async save(newLikeStatusForPost: LikeStatusForPostDocument) {
     return newLikeStatusForPost.save();
   }
+
+  async findAllDocumentsByArrayPostId(arrayPostId: string[]) {
+    /* вмассиве в котором каждый элемент это айдишкаПОСТА
+     и по этим айдишкам найдет все существующие документы*/
+    return this.likeStatusModelForPost
+      .find({
+        postId: { $in: arrayPostId },
+      })
+      .sort({ addedAt: -1 });
+
+    /*.sort({ addedAt: -1 }) - это метод, который сортирует
+     результаты по полю addedAt в порядке
+      убывания (-1). Это означает, что более новые 
+      документы будут в начале результата, а более
+       старые - в конце*/
+  }
 }

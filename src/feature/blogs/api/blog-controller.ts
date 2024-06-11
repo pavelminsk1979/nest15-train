@@ -10,6 +10,7 @@ import {
   Post,
   Put,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { BlogQueryRepository } from '../repositories/blog-query-repository';
@@ -25,6 +26,8 @@ import { CreatePostForBlogCommand } from '../services/create-post-for-blog-servi
 import { CreateBlogCommand } from '../services/create-blog-service';
 import { AuthGuard } from '../../../common/guard/auth-guard';
 import { QueryParamsInputModel } from '../../../common/pipes/query-params-input-model';
+import { DataUserExtractorFromTokenGuard } from '../../../common/guard/data-user-extractor-from-token-guard';
+import { Request } from 'express';
 
 @Controller('blogs')
 export class BlogController {
@@ -126,35 +129,42 @@ export class BlogController {
     @Param('blogId') blogId: string,
     @Body() createPostForBlogInputModel: CreatePostForBlogInputModel,
   ): Promise<ViewPost | null> {
-    const postId: string | null = await this.commandBus.execute(
+    /* создать новый пост ДЛЯ КОНКРЕТНОГО БЛОГА и вернут
+     данные этого поста и также структуру 
+    данных(снулевыми значениями)  о лайках к этому посту*/
+
+    const post: ViewPost | null = await this.commandBus.execute(
       new CreatePostForBlogCommand(blogId, createPostForBlogInputModel),
     );
-
-    if (!postId) {
-      throw new NotFoundException(
-        'Cannot create post because blog does not exist- ' +
-          ':method-post,url -blogs/:blogId /post',
-      );
-    }
-
-    const post: ViewPost | null =
-      await this.postQueryRepository.getPostById(postId);
 
     if (post) {
       return post;
     } else {
       throw new NotFoundException(
-        'Cannot create post- ' + ':method-post,url -blogs/:blogId /post',
+        'Not create post- ' + ':method-post,url -blogs/:blogId /post',
       );
     }
   }
 
+  @UseGuards(DataUserExtractorFromTokenGuard)
   @Get(':blogId/posts')
   async getPostsForBlog(
     @Param('blogId') blogId: string,
     @Query() queryParamsPostForBlogInputModel: QueryParamsInputModel,
+    @Req() request: Request,
   ): Promise<ViewArrayPosts> {
+    /*Айдишка пользователя нужна-- когда 
+    отдадим ответ в нем дудет информация 
+    о том какой статус учтановил данный пользователь
+    который этот запрос делает */
+
+    const userId: string | null = request['userId'];
+
+    //вернуть все posts(массив) для корректного блога
+    //и у каждого поста  будут данные о лайках
+
     const posts = await this.postQueryRepository.getPostsByCorrectBlogId(
+      userId,
       blogId,
       queryParamsPostForBlogInputModel,
     );
