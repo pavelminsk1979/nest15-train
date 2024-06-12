@@ -274,22 +274,21 @@ export class PostQueryRepository {
   }
 
   producePostWithInfoLikeStatus(
-    /*post- это один документ */
-
     post: PostDocument,
-    /*  это массив - мне надо их количество-length*/
+    /*post- это один документ */
 
     like: LikeStatusForPostDocument[],
     /*  это массив - мне надо их количество-length*/
 
     dislike: LikeStatusForPostDocument[],
-    /*   статус
-     пользователя который текущий запрос делает*/
+    /*  это массив - мне надо их количество-length*/
 
     likeStatusCurrentPostCurrentUser: LikeStatus,
-    /*   тири документа - это самые последние(новые) которые
-     ЛАЙК этому посту поставили*/
+    /*   статус
+    пользователя который текущий запрос делает*/
 
     threeDocumentWithLike: LikeStatusForPostDocument[],
+    /*   тири документа - это самые последние(новые) которые
+   ЛАЙК этому посту поставили*/
   ): ViewPost {}
 }
