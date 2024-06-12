@@ -16,7 +16,10 @@ import {
 import { BlogQueryRepository } from '../repositories/blog-query-repository';
 import { ViewBlog } from './types/views';
 import { PostQueryRepository } from '../../posts/repositories/post-query-repository';
-import { ViewArrayPosts, ViewPost } from '../../posts/api/types/views';
+import {
+  PostWithLikesInfo,
+  ViewModelWithArrayPosts,
+} from '../../posts/api/types/views';
 import { CreateBlogInputModel } from './pipes/create-blog-input-model';
 import { CreatePostForBlogInputModel } from './pipes/create-post-for-blog-input-model';
 import { DeleteBlogByIdCommand } from '../services/delete-blog-by-id-service';
@@ -123,19 +126,36 @@ export class BlogController {
     }
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, DataUserExtractorFromTokenGuard)
   @Post(':blogId/posts')
   async createPostFortBlog(
     @Param('blogId') blogId: string,
     @Body() createPostForBlogInputModel: CreatePostForBlogInputModel,
-  ): Promise<ViewPost | null> {
+    @Req() request: Request,
+  ): Promise<PostWithLikesInfo | null> {
+    /* чтобы переиспользовать в этом обработчике метод
+ getPostById  ему нужна (userId)- она будет 
+ в данном случае null но главное что удовлетворяю
+ метод значением-userId*/
+
+    const userId: string | null = request['userId'];
+
     /* создать новый пост ДЛЯ КОНКРЕТНОГО БЛОГА и вернут
      данные этого поста и также структуру 
     данных(снулевыми значениями)  о лайках к этому посту*/
 
-    const post: ViewPost | null = await this.commandBus.execute(
+    const postId: string | null = await this.commandBus.execute(
       new CreatePostForBlogCommand(blogId, createPostForBlogInputModel),
     );
+
+    if (!postId) {
+      throw new NotFoundException(
+        'Not found blog- ' + ':method-post,url -blogs/:blogId /post',
+      );
+    }
+
+    const post: PostWithLikesInfo | null =
+      await this.postQueryRepository.getPostById(userId, postId);
 
     if (post) {
       return post;
@@ -152,7 +172,7 @@ export class BlogController {
     @Param('blogId') blogId: string,
     @Query() queryParamsPostForBlogInputModel: QueryParamsInputModel,
     @Req() request: Request,
-  ): Promise<ViewArrayPosts> {
+  ): Promise<ViewModelWithArrayPosts> {
     /*Айдишка пользователя нужна для-- когда
     отдадим ответ в нем дудет информация 
     о том какой статус учтановил данный пользователь

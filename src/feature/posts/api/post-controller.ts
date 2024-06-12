@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { PostService } from '../services/post-service';
 import { PostQueryRepository } from '../repositories/post-query-repository';
-import { ViewArrayPosts, ViewPost } from './types/views';
+import { PostWithLikesInfo, ViewModelWithArrayPosts } from './types/views';
 import { CommentQueryRepository } from '../../comments/reposetories/comment-query-repository';
 import { ViewArrayComments } from '../../comments/types/views';
 import { CreatePostInputModel } from './pipes/create-post-input-model';
@@ -39,13 +39,21 @@ export class PostsController {
     protected commentService: CommentService,
   ) {}
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, DataUserExtractorFromTokenGuard)
   /*  @HttpCode(HttpStatus.CREATED) по умолчанию 201
     поэтому необязательно это прописывать */
   @Post()
   async createPost(
     @Body() createPostInputModel: CreatePostInputModel,
-  ): Promise<ViewPost | null> {
+    @Req() request: Request,
+  ): Promise<PostWithLikesInfo | null> {
+    /* чтобы переиспользовать в этом обработчике метод
+     getPostById  ему нужна (userId)- она будет
+     в данном случае null но главное что удовлетворяю
+     метод значением-userId*/
+
+    const userId: string | null = request['userId'];
+
     /* создать новый пост  и вернуть данные этого поста и также
     внутри структуру данных(снулевыми значениями)  о лайках  к этому посту*/
 
@@ -58,8 +66,8 @@ export class PostsController {
       );
     }
 
-    const post: ViewPost | null =
-      await this.postQueryRepository.getPostById(postId);
+    const post: PostWithLikesInfo | null =
+      await this.postQueryRepository.getPostById(userId, postId);
 
     if (post) {
       return post;
@@ -73,26 +81,38 @@ export class PostsController {
   async getPosts(
     @Query() queryParamsPostInputModel: QueryParamsInputModel,
     @Req() request: Request,
-  ): Promise<ViewArrayPosts> {
+  ): Promise<ViewModelWithArrayPosts> {
     /*Айдишка пользователя нужна для-- когда
- отдадим ответ в нем дудет информация 
+ отдадим ответ в нем дудет информация
  о том какой статус учтановил данный пользователь
  который этот запрос делает */
 
     const userId: string | null = request['userId'];
 
-    const posts: ViewArrayPosts = await this.postQueryRepository.getPosts(
-      userId,
-      queryParamsPostInputModel,
-    );
+    const posts: ViewModelWithArrayPosts =
+      await this.postQueryRepository.getPosts(
+        userId,
+        queryParamsPostInputModel,
+      );
 
     return posts;
   }
 
+  @UseGuards(DataUserExtractorFromTokenGuard)
   @Get(':id')
-  async getPostById(@Param('id') postId: string): Promise<ViewPost | null> {
-    const post: ViewPost | null =
-      await this.postQueryRepository.getPostById(postId);
+  async getPostById(
+    @Param('id') postId: string,
+    @Req() request: Request,
+  ): Promise<PostWithLikesInfo | null> {
+    /*Айдишка пользователя нужна для-- когда
+отдадим ответ в нем дудет информация
+о том какой статус учтановил данный пользователь
+который этот запрос делает */
+
+    const userId: string | null = request['userId'];
+
+    const post: PostWithLikesInfo | null =
+      await this.postQueryRepository.getPostById(userId, postId);
 
     if (post) {
       return post;
@@ -137,13 +157,27 @@ export class PostsController {
     }
   }
 
+  @UseGuards(DataUserExtractorFromTokenGuard)
   @Get(':postId/comments')
   async getCommentsForPost(
     @Param('postId') postId: string,
     @Query() queryCommentsForPost: QueryParamsInputModel,
+    @Req() request: Request,
   ): Promise<ViewArrayComments> {
+    /*Айдишка пользователя нужна для-- когда
+отдадим ответ в нем будет информация
+о том какой статус учтановил данный пользователь
+который этот запрос делает */
+
+    const userId: string | null = request['userId'];
+
+    //вернуть все коментарии(массив) корректного поста
+    //и у каждого коментария будут данные о лайках
+    //к этому коментарию
+
     const comments: ViewArrayComments | null =
       await this.commentQueryRepository.getComments(
+        userId,
         postId,
         queryCommentsForPost,
       );

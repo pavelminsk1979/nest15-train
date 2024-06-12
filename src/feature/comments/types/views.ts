@@ -1,23 +1,17 @@
-import { ViewPost } from '../../posts/api/types/views';
-
-export enum StatusLike {
-  None = 'None',
-  Like = 'Like',
-  Dislike = 'Dislike',
-}
+import { LikeStatus } from '../../../common/types';
 
 type CommentatorInfo = {
   userId: string;
   userLogin: string;
 };
 
-type LikesInfo = {
+export type LikesInfo = {
   likesCount: number;
   dislikesCount: number;
-  myStatus: StatusLike;
+  myStatus: LikeStatus;
 };
 
-export type ViewComment = {
+export type CommentWithLikeInfo = {
   id: string;
   content: string;
   commentatorInfo: CommentatorInfo;
@@ -30,5 +24,5 @@ export type ViewArrayComments = {
   page: number;
   pageSize: number;
   totalCount: number;
-  items: ViewComment[];
+  items: CommentWithLikeInfo[];
 };

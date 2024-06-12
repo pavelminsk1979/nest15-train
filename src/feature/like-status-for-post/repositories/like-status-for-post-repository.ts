@@ -39,4 +39,10 @@ export class LikeStatusForPostRepository {
       документы будут в начале результата, а более
        старые - в конце*/
   }
+
+  async findAllDocumentByPostId(
+    postId: string,
+  ): Promise<LikeStatusForPostDocument[]> {
+    return this.likeStatusModelForPost.find({ postId }).sort({ addedAt: -1 });
+  }
 }

@@ -24,7 +24,7 @@ export type PostWithLikesInfo = {
   extendedLikesInfo: ExtendedLikesInfo;
 };
 
-export type ViewArrayPosts = {
+export type ViewModelWithArrayPosts = {
   pagesCount: number;
   page: number;
   pageSize: number;

@@ -24,4 +24,21 @@ export class LikeStatusForCommentRepository {
   async save(newLikeStatusForComment: LikeStatusForCommentDocument) {
     return newLikeStatusForComment.save();
   }
+
+  async findAllDocumentsByArrayCommentId(arrayCommentId: string[]) {
+    /* вмассиве в котором каждый элемент это айдишкаКоментария
+ и по этим айдишкам найдет все существующие документы*/
+
+    return this.likeStatusModelForComment
+      .find({
+        postId: { $in: arrayCommentId },
+      })
+      .sort({ addedAt: -1 });
+
+    /*.sort({ addedAt: -1 }) - это метод, который сортирует
+     результаты по полю addedAt в порядке
+      убывания (-1). Это означает, что более новые 
+      документы будут в начале результата, а более
+       старые - в конце*/
+  }
 }

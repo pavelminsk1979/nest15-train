@@ -7,7 +7,6 @@ import { Post, PostDocument } from '../../posts/domains/domain-post';
 import { PostRepository } from '../../posts/repositories/post-repository';
 import { CreatePostForBlogInputModel } from '../api/pipes/create-post-for-blog-input-model';
 import { CommandHandler } from '@nestjs/cqrs';
-import { ViewPost } from '../../posts/api/types/views';
 import { PostQueryRepository } from '../../posts/repositories/post-query-repository';
 
 export class CreatePostForBlogCommand {
@@ -54,14 +53,6 @@ export class CreatePostForBlogService {
 
     const post: PostDocument = await this.postRepository.save(newPost);
 
-    // теперь надо создать структуру которую
-    //ожидает фронтенд (cогласно Swager)
-
-    const postId = post._id.toString();
-
-    const viewPost: ViewPost | null =
-      await this.postQueryRepository.getPostById(postId);
-
-    return viewPost;
+    return post._id.toString();
   }
 }
