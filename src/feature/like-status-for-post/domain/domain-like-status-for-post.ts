@@ -17,6 +17,9 @@ export class LikeStatusForPost {
 
   @Prop({ required: true })
   addedAt: string;
+
+  @Prop({ required: true })
+  login: string;
 }
 
 export const LikeStatusForPostShema =

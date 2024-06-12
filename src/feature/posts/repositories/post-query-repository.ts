@@ -2,7 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostDocument } from '../domains/domain-post';
-import { StatusLike, ViewArrayPosts, ViewPost } from '../api/types/views';
+import {
+  ExtendedLikesInfo,
+  NewestLikes,
+  PostWithLikesInfo,
+  ViewArrayPosts,
+} from '../api/types/views';
 import { QueryParamsInputModel } from '../../../common/pipes/query-params-input-model';
 import { LikeStatusForPostRepository } from '../../like-status-for-post/repositories/like-status-for-post-repository';
 import { LikeStatusForPostDocument } from '../../like-status-for-post/domain/domain-like-status-for-post';
@@ -22,7 +27,10 @@ export class PostQueryRepository {
     protected likeStatusForPostRepository: LikeStatusForPostRepository,
   ) {}
 
-  async getPosts(queryParamsPostForBlog: QueryParamsInputModel) {
+  async getPosts(
+    userId: string | null,
+    queryParamsPostForBlog: QueryParamsInputModel,
+  ) {
     const { sortBy, sortDirection, pageNumber, pageSize } =
       queryParamsPostForBlog;
 
@@ -43,12 +51,41 @@ export class PostQueryRepository {
 
     const pagesCount: number = Math.ceil(totalCount / pageSize);
 
-    /*cоздаю массив постов-он будет потом помещен
-    в обект который на фронтенд отправится*/
+    /* Если в коллекции postModel не будет постов ,
+     тогда  метод find вернет пустой
+ массив ([]) в переменную posts.*/
 
-    const arrayPosts: ViewPost[] = posts.map((post: PostDocument) => {
-      return this.createViewModelPost(post);
-    });
+    if (posts.length === 0) {
+      return {
+        pagesCount,
+        page: pageNumber,
+        pageSize: pageSize,
+        totalCount,
+        items: [],
+      };
+    }
+
+    /* найду все документы из колекции лайков которые относятся
+     к постам полученым */
+
+    const allLikeStatusDocumentsForCurrentPosts:
+      | LikeStatusForPostDocument[]
+      | null = await this.getAllLikeStatusDocumentsForCurrentPosts(posts);
+
+    //ЕСЛИ НЕ БУДЕТ ТАКИХ ДОКУМНТОВ
+    /*   if (!arrayDocummentsLikeStatus) {
+         arrayPosts = [];
+         return viewPosts;
+       }*/
+
+    /*создаю массив постов с информацией о лайках
+  его буду  отправлять на фронтенд*/
+
+    const arrayPosts: PostWithLikesInfo[] = this.createArrayPostsWithLikesInfo(
+      userId,
+      posts,
+      allLikeStatusDocumentsForCurrentPosts,
+    );
 
     const viewPosts: ViewArrayPosts = {
       pagesCount,
@@ -87,7 +124,41 @@ export class PostQueryRepository {
 
     const pagesCount: number = Math.ceil(totalCount / pageSize);
 
-    let arrayPosts: ViewPost[] = [];
+    /* Если в коллекции postModel не будет документов,
+       c указаным  blogId , то метод find вернет пустой
+     массив ([]) в переменную posts.*/
+
+    if (posts.length === 0) {
+      return {
+        pagesCount,
+        page: pageNumber,
+        pageSize: pageSize,
+        totalCount,
+        items: [],
+      };
+    }
+
+    /* найду все документы из колекции лайков которые относятся
+     к постам полученым */
+
+    const allLikeStatusDocumentsForCurrentPosts:
+      | LikeStatusForPostDocument[]
+      | null = await this.getAllLikeStatusDocumentsForCurrentPosts(posts);
+
+    //ЕСЛИ НЕ БУДЕТ ТАКИХ ДОКУМНТОВ
+    /*   if (!arrayDocummentsLikeStatus) {
+         arrayPosts = [];
+         return viewPosts;
+       }*/
+
+    /*создаю массив постов с информацией о лайках
+     его буду  отправлять на фронтенд*/
+
+    const arrayPosts: PostWithLikesInfo[] = this.createArrayPostsWithLikesInfo(
+      userId,
+      posts,
+      allLikeStatusDocumentsForCurrentPosts,
+    );
 
     const viewPosts: ViewArrayPosts = {
       pagesCount,
@@ -97,105 +168,38 @@ export class PostQueryRepository {
       items: arrayPosts,
     };
 
-    /* Если в коллекции postModel не будет документов,
-       c указаным  blogId , то метод find вернет пустой
-     массив ([]) в переменную posts.*/
+    return viewPosts;
+  }
 
-    if (posts.length === 0) {
-      arrayPosts = [];
-      return viewPosts;
-    }
-
+  async getAllLikeStatusDocumentsForCurrentPosts(posts: PostDocument[]) {
     /* из posts( массив постов)
-     - достану из каждого поста  _id(aйдишку поста)
-     буду иметь массив айдишек */
+ - достану из каждого поста  _id(aйдишку поста)
+ буду иметь массив айдишек */
 
     const arrayPostId: string[] = posts.map((e) => e._id.toString());
 
     /*из коллекции LikeStatusForPost
       достану все документы у которых postId такиеже
-       как в массиве айдишек */
+       как в массиве айдишек плюс они будут отсортированы 
+       (первый самый новый)*/
 
-    const arrayDocummentsLikeStatus: LikeStatusForPostDocument[] | null =
-      await this.likeStatusForPostRepository.findAllDocumentsByArrayPostId(
-        arrayPostId,
-      );
-
-    if (!arrayDocummentsLikeStatus) {
-      arrayPosts = [];
-      return viewPosts;
-    }
-
-    /*создаю массив постов с информацией о лайках
-     его буду  отправлять на фронтенд*/
-
-    arrayPosts = await this.createArrayPostsWithInfoLikeStatus(
-      userId,
-      posts,
-      arrayDocummentsLikeStatus,
+    return this.likeStatusForPostRepository.findAllDocumentsByArrayPostId(
+      arrayPostId,
     );
-
-    /*
-    //////////////////////////////////////////
-        /!*cоздаю массив постов-он будет потом помещен
-        в обект который на фронтенд отправится*!/
-
-        const arrayPosts: ViewPost[] = posts.map((post: PostDocument) => {
-          return this.createViewModelPost(post);
-        });
-    /////////////////////////////////////////////////*/
-
-    return viewPosts;
   }
 
-  async getPostById(postId: string) {
-    const post: PostDocument | null = await this.postModel.findById(postId);
-
-    if (post) {
-      return this.createViewModelNewPost(post);
-    } else {
-      return null;
-    }
-  }
-
-  /*  ЭТОТ МЕТОД ДЛЯ СОЗДАНИЯ ВИДА !!! НОВОГО ПОСТА !!!
-   * отличатся будет потомучто у нового поста еще не будет
-   * лайков и поэтому значения лайков будут нулевые
-   * вобще нет запросов за лайками в базу данных
-   * */
-  createViewModelNewPost(post: PostDocument): ViewPost {
-    return {
-      id: post._id.toString(),
-      title: post.title,
-      shortDescription: post.shortDescription,
-      content: post.content,
-      blogId: post.blogId,
-      blogName: post.blogName,
-      createdAt: post.createdAt,
-      extendedLikesInfo: {
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: StatusLike.None,
-        newestLikes: [
-          {
-            addedAt: '',
-            userId: '',
-            login: '',
-          },
-        ],
-      },
-    };
-  }
-
-  async createArrayPostsWithInfoLikeStatus(
-    // для myStatus
+  createArrayPostsWithLikesInfo(
     userId: string | null,
-    //массив постов
+    /*  чтоб узнать какой ЛайкСтатус у пользователя
+ который данный запрос делает */
+
     posts: PostDocument[],
-    /*все документы  ЛАЙКИ из базы данных  относящиеся 
-     к постам которые в массиве постов */
+    //массив постов
+
     arrayDocummentsLikeStatus: LikeStatusForPostDocument[],
-  ): Promise<ViewPost[]> {
+    /*все документы  ЛАЙКИ из базы данных  относящиеся 
+    к постам которые в массиве постов */
+  ): PostWithLikesInfo[] {
     /* массив постов мапом прохожу и для каждого поста 
      делаю операции */
 
@@ -246,7 +250,7 @@ export class PostQueryRepository {
       }
 
       /*  использую еще один метод (МАПЕР) который преобразует 
-        каждый(один) ПРЕОБРАЗУЕТ К ТАКОМУ ВИДУ КОТОРЫЙ ОЖИДАЕТ
+        каждый(один ПОСТ) К ТАКОМУ ВИДУ КОТОРЫЙ ОЖИДАЕТ
         ФРОНТЕНД 
         ---post: PostDocument- напомню нахожусь внутри метода map
         и post - это текущий документ 
@@ -259,7 +263,7 @@ export class PostQueryRepository {
         ЛАЙК этому посту поставили 
        */
 
-      const postWithLikeInfo: ViewPost = this.producePostWithInfoLikeStatus(
+      const extendedLikesInfo: ExtendedLikesInfo = this.createExtendedLikesInfo(
         post,
         like,
         dislike,
@@ -267,13 +271,22 @@ export class PostQueryRepository {
         threeDocumentWithLike,
       );
 
-      return postWithLikeInfo;
+      return {
+        id: post._id.toString(),
+        title: post.title,
+        shortDescription: post.shortDescription,
+        content: post.content,
+        blogId: post.blogId,
+        blogName: post.blogName,
+        createdAt: post.createdAt,
+        extendedLikesInfo,
+      };
     });
 
     return arrayPostsWithLikeInfo;
   }
 
-  producePostWithInfoLikeStatus(
+  createExtendedLikesInfo(
     post: PostDocument,
     /*post- это один документ */
 
@@ -290,5 +303,61 @@ export class PostQueryRepository {
     threeDocumentWithLike: LikeStatusForPostDocument[],
     /*   тири документа - это самые последние(новые) которые
    ЛАЙК этому посту поставили*/
-  ): ViewPost {}
+  ): ExtendedLikesInfo {
+    const threeLatestLike: NewestLikes[] = threeDocumentWithLike.map(
+      (el: LikeStatusForPostDocument) => {
+        return {
+          userId: el.userId,
+          addedAt: el.addedAt,
+          login: el.login,
+        };
+      },
+    );
+
+    return {
+      likesCount: like.length,
+      dislikesCount: dislike.length,
+      myStatus: likeStatusCurrentPostCurrentUser,
+      newestLikes: threeLatestLike,
+    };
+  }
+
+  async getPostById(postId: string) {
+    const post: PostDocument | null = await this.postModel.findById(postId);
+
+    if (post) {
+      return this.createViewModelNewPost(post);
+    } else {
+      return null;
+    }
+  }
+
+  /*  ЭТОТ МЕТОД ДЛЯ СОЗДАНИЯ ВИДА !!! НОВОГО ПОСТА !!!
+   * отличатся будет потомучто у нового поста еще не будет
+   * лайков и поэтому значения лайков будут нулевые
+   * вобще нет запросов за лайками в базу данных
+   * */
+  createViewModelNewPost(post: PostDocument): PostWithLikesInfo {
+    return {
+      id: post._id.toString(),
+      title: post.title,
+      shortDescription: post.shortDescription,
+      content: post.content,
+      blogId: post.blogId,
+      blogName: post.blogName,
+      createdAt: post.createdAt,
+      extendedLikesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: LikeStatus.NONE,
+        newestLikes: [
+          {
+            addedAt: '',
+            userId: '',
+            login: '',
+          },
+        ],
+      },
+    };
+  }
 }

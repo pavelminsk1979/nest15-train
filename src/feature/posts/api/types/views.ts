@@ -1,23 +1,19 @@
-export enum StatusLike {
-  None = 'None',
-  Like = 'Like',
-  Dislike = 'Dislike',
-}
+import { LikeStatus } from '../../../../common/types';
 
-type NewestLikes = {
+export type NewestLikes = {
   addedAt: string;
   userId: string;
   login: string;
 };
 
-type ExtendedLikesInfo = {
+export type ExtendedLikesInfo = {
   likesCount: number;
   dislikesCount: number;
-  myStatus: StatusLike;
+  myStatus: LikeStatus;
   newestLikes: NewestLikes[];
 };
 
-export type ViewPost = {
+export type PostWithLikesInfo = {
   id: string;
   title: string;
   shortDescription: string;
@@ -33,5 +29,5 @@ export type ViewArrayPosts = {
   page: number;
   pageSize: number;
   totalCount: number;
-  items: ViewPost[];
+  items: PostWithLikesInfo[];
 };

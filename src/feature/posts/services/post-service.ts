@@ -13,6 +13,7 @@ import {
   LikeStatusForPost,
   LikeStatusForPostDocument,
 } from '../../like-status-for-post/domain/domain-like-status-for-post';
+import { UsersRepository } from '../../users/repositories/user-repository';
 
 @Injectable()
 /*@Injectable()-декоратор что данный клас
@@ -29,7 +30,8 @@ export class PostService {
     protected postRepository: PostRepository,
     protected likeStatusForPostRepository: LikeStatusForPostRepository,
     @InjectModel(LikeStatusForPost.name)
-    private likeStatusModelForPost: Model<LikeStatusForPostDocument>,
+    protected likeStatusModelForPost: Model<LikeStatusForPostDocument>,
+    protected usersRepository: UsersRepository,
   ) {}
 
   async createPost(createPostInputModel: CreatePostInputModel) {
@@ -76,6 +78,13 @@ export class PostService {
     postId: string,
     likeStatus: LikeStatus,
   ) {
+    const userDocument = await this.usersRepository.getUserById(userId);
+    /*для создания нового документа(newLikeStatusForPost) потребуется
+  login  создателя--- этот login потребуется вдальнейшем когда буду 
+   формировать view для отдачи на фронт */
+
+    const login = userDocument!.login;
+
     /* проверка- существует ли в базе такой пост*/
 
     const postDocument = await this.postRepository.getPostById(postId);
@@ -100,6 +109,7 @@ export class PostService {
           userId,
           postId,
           likeStatus,
+          login,
           addedAt: new Date().toISOString(),
         });
 

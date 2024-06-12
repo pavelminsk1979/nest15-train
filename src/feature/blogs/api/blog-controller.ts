@@ -153,7 +153,7 @@ export class BlogController {
     @Query() queryParamsPostForBlogInputModel: QueryParamsInputModel,
     @Req() request: Request,
   ): Promise<ViewArrayPosts> {
-    /*Айдишка пользователя нужна-- когда 
+    /*Айдишка пользователя нужна для-- когда
     отдадим ответ в нем дудет информация 
     о том какой статус учтановил данный пользователь
     который этот запрос делает */
