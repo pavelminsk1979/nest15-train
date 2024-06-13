@@ -9,5 +9,5 @@ export enum LikeStatus {
 
   LIKE = 'Like',
 
-  DISLIKE = 'Dislike ',
+  DISLIKE = 'Dislike',
 }
