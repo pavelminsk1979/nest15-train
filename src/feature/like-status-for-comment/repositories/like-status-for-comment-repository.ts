@@ -1,5 +1,4 @@
 import { InjectModel } from '@nestjs/mongoose';
-import { LikeStatusForPostDocument } from '../../like-status-for-post/domain/domain-like-status-for-post';
 import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import {
@@ -26,19 +25,17 @@ export class LikeStatusForCommentRepository {
   }
 
   async findAllDocumentsByArrayCommentId(arrayCommentId: string[]) {
-    /* вмассиве в котором каждый элемент это айдишкаКоментария
+    /* массив в котором каждый элемент это айдишкаКоментария
  и по этим айдишкам найдет все существующие документы*/
 
-    return this.likeStatusModelForComment
-      .find({
-        postId: { $in: arrayCommentId },
-      })
-      .sort({ addedAt: -1 });
+    return this.likeStatusModelForComment.find({
+      postId: { $in: arrayCommentId },
+    });
+  }
 
-    /*.sort({ addedAt: -1 }) - это метод, который сортирует
-     результаты по полю addedAt в порядке
-      убывания (-1). Это означает, что более новые 
-      документы будут в начале результата, а более
-       старые - в конце*/
+  async findAllDocumentsByCommentId(
+    commentId: string,
+  ): Promise<LikeStatusForCommentDocument[]> {
+    return this.likeStatusModelForComment.find({ commentId });
   }
 }

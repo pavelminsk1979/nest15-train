@@ -18,6 +18,7 @@ import { CommentService } from '../services/comment-service';
 import { Request } from 'express';
 import { SetLikeStatusForCommentInputModel } from './pipe/set-like-status-for-comment-input-model';
 import { LikeStatusForCommentDocument } from '../../like-status-for-comment/domain/domain-like-status-for-comment';
+import { DataUserExtractorFromTokenGuard } from '../../../common/guard/data-user-extractor-from-token-guard';
 
 @Controller('comments')
 export class CommentController {
@@ -26,9 +27,26 @@ export class CommentController {
     protected commentService: CommentService,
   ) {}
 
+  @UseGuards(DataUserExtractorFromTokenGuard)
   @Get(':id')
-  async getCommentById(@Param('id') commentId: string) {
-    const comment = await this.commentQueryRepository.getCommentById(commentId);
+  async getCommentById(
+    @Param('id') commentId: string,
+    @Req() request: Request,
+  ) {
+    /*Айдишка пользователя нужна для-- когда
+отдадим ответ в нем будет информация
+о том какой статус учтановил данный пользователь
+который этот запрос делает */
+
+    const userId: string | null = request['userId'];
+
+    //вернуть один  коментарий по айдишке
+    //и у него будут данные о лайках
+
+    const comment = await this.commentQueryRepository.getCommentById(
+      userId,
+      commentId,
+    );
 
     if (comment) {
       return comment;

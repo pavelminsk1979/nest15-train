@@ -223,7 +223,10 @@ export class PostsController {
       );
     }
 
-    const comment = await this.commentQueryRepository.getCommentById(commentId);
+    const comment = await this.commentQueryRepository.getCommentById(
+      userId,
+      commentId,
+    );
 
     if (comment) {
       return comment;

@@ -81,16 +81,16 @@ export class CommentQueryRepository {
     const arrayCommentId = comments.map((e) => e._id.toString());
 
     /*из коллекции LikeStatusForComment
-    достану все документы которые имеют commentId
-   из массива  arrayCommentsId  плюс они будут отсортированы
-    (первый самый новый)*/
+    достану все документы в  которых  имеются commentId
+   из массива  arrayCommentsId*/
 
-    const allLikeStatusDocumentsForCurrentComments: LikeStatusForCommentDocument[] =
+    const allLikeStatusDocumentsForSortComments: LikeStatusForCommentDocument[] =
       await this.likeStatusForCommentRepository.findAllDocumentsByArrayCommentId(
         arrayCommentId,
       );
 
-    /*создаю массив коментариев с информацией о лайках
+    /*создаю массив c данными о коментариях и  с информацией о
+     лайках к этому коментарию
     (он пойдет на фронтенд)
     мапом прохожу и для каждого поста
     делаю операции для получения обьекта   тип- CommentWithLikeInfo*/
@@ -106,7 +106,7 @@ export class CommentQueryRepository {
         this.createAloneCommentWithLikeInfo(
           userId,
           comment,
-          allLikeStatusDocumentsForCurrentComments,
+          allLikeStatusDocumentsForSortComments,
         );
 
       return commentWithLikeInfo;
@@ -122,16 +122,15 @@ export class CommentQueryRepository {
     /* нахожусь внутри метода map
    и comment - это текущий документ*/
 
-    allLikeStatusDocumentsForAllCurrentComments: LikeStatusForCommentDocument[],
-    /*  метод map обрабатывает массив и в этом массиве
-  много коментариев И ЭТО ВСЕ ЛАЙКИ КО ВСЕМ
-  ЭТИМ КОМЕНТАРИЯМ*/
+    allLikeStatusDocumentsForSortComments: LikeStatusForCommentDocument[],
+    /*  ТО ВСЕ ЛАЙКИ КО ВСЕМ
+  ЭТИМ КОМЕНТАРИЯМ которые отдам на фронтенд*/
   ) {
     /*для текущего комента  нахожу все документы
     из массива ЛАЙКОВ */
 
     const allLikeStatusDocumentForAloneComment: LikeStatusForCommentDocument[] =
-      allLikeStatusDocumentsForAllCurrentComments.filter(
+      allLikeStatusDocumentsForSortComments.filter(
         (e) => e.commentId === comment._id.toString(),
       );
 
@@ -155,7 +154,7 @@ export class CommentQueryRepository {
 
     let myStatus: LikeStatus;
 
-    const result = allLikeStatusDocumentsForAllCurrentComments.find(
+    const result = allLikeStatusDocumentForAloneComment.find(
       (e) => e.userId === userId,
     );
 
@@ -183,27 +182,25 @@ export class CommentQueryRepository {
     };
   }
 
-  async getCommentById(commentId: string) {
+  async getCommentById(userId: string | null, commentId: string) {
     const comment = await this.commentModel.findById(commentId);
 
-    if (comment) {
-      return this.createViewModelComment(comment);
-    } else {
-      return null;
-    }
-  }
+    if (!comment) return null;
 
-  createViewModelComment(comment: CommentDocument): CommentWithLikeInfo {
-    return {
-      id: comment._id.toString(),
-      content: comment.content,
-      commentatorInfo: comment.commentatorInfo,
-      createdAt: comment.createdAt,
-      likesInfo: {
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: LikeStatus.NONE,
-      },
-    };
+    /* найду все документы LikeStatus для текущего коментария
+     * если ничего не найдет то вернет пустой массив*/
+
+    const allDocumentsLikeStatus: LikeStatusForCommentDocument[] =
+      await this.likeStatusForCommentRepository.findAllDocumentsByCommentId(
+        commentId,
+      );
+
+    const commentWithLikeInfo = this.createAloneCommentWithLikeInfo(
+      userId,
+      comment,
+      allDocumentsLikeStatus,
+    );
+
+    return commentWithLikeInfo;
   }
 }
