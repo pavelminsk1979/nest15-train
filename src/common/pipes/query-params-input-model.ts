@@ -6,7 +6,7 @@ export enum SortDirection {
   DESC = 'desc',
 }
 
-export class QueryParams {
+export class QueryParamsInputModel {
   @IsOptional()
   @IsString()
   public searchEmailTerm: string | null = null;
