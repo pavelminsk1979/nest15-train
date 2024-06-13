@@ -28,6 +28,21 @@ describe('tests for andpoint blogs', () => {
     await app.close();
   });
 
+  it('create 1   blog, next delet all data, and get blogs', async () => {
+    const blogManagerForTest = new BlogManagerForTest(app);
+
+    const blog = await blogManagerForTest.createBlog(
+      'name',
+      'description',
+      'https://www.outue.com/',
+    );
+
+    await request(app.getHttpServer()).delete('/testing/all-data');
+
+    const res = await request(app.getHttpServer()).get('/blogs').expect(200);
+    console.log(res.body);
+  });
+
   it('should be mistake when create blog', async () => {
     const res = await request(app.getHttpServer())
       .post('/blogs')
