@@ -39,6 +39,12 @@ export class BlogQueryRepository {
     const arrayBlogs: ViewBlog[] = blogs.map((blog: BlogDocument) => {
       return this.createViewModelBlog(blog);
     });
+    /*   console.log('------------------');
+       console.log(typeof pageNumber);
+       console.log('pageNumber');
+       console.log(typeof pageSize);
+       console.log('pageSize');
+       console.log('------------------');*/
 
     const viewBlogs: ViewArrayBlog = {
       pagesCount,

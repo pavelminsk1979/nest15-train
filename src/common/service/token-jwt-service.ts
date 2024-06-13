@@ -49,7 +49,7 @@ export class TokenJwtService {
       };
       return result.userId;
     } catch (error) {
-      console.log(' FILE token-jwt-service.ts' + error);
+      //console.log(' FILE token-jwt-service.ts' + error);
       return null;
     }
   }

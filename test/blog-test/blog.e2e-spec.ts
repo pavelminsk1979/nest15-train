@@ -28,7 +28,7 @@ describe('tests for andpoint blogs', () => {
     await app.close();
   });
 
-  it('create 1   blog, next delet all data, and get blogs', async () => {
+  it('create 1   blog  and get blogs', async () => {
     const blogManagerForTest = new BlogManagerForTest(app);
 
     const blog = await blogManagerForTest.createBlog(
@@ -37,9 +37,9 @@ describe('tests for andpoint blogs', () => {
       'https://www.outue.com/',
     );
 
-    await request(app.getHttpServer()).delete('/testing/all-data');
-
-    const res = await request(app.getHttpServer()).get('/blogs').expect(200);
+    const res = await request(app.getHttpServer())
+      .get('/blogs?pageSize=3&pageNumber=1')
+      .expect(200);
     console.log(res.body);
   });
 

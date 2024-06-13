@@ -75,6 +75,7 @@ export class BlogController {
     const blogs = await this.blogQueryRepository.getBlogs(
       queryParamsBlogInputModel,
     );
+
     return blogs;
   }
 
