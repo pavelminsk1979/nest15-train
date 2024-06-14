@@ -194,8 +194,7 @@ export class BlogController {
       return posts;
     } else {
       throw new NotFoundException(
-        'blog or post  is not exists  ' +
-          ':method-get,url -blogs/:blogId /posts',
+        'blog  is not exists  ' + ':method-get,url -blogs/:blogId /posts',
       );
     }
   }

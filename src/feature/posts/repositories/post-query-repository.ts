@@ -11,6 +11,7 @@ import { QueryParamsInputModel } from '../../../common/pipes/query-params-input-
 import { LikeStatusForPostRepository } from '../../like-status-for-post/repositories/like-status-for-post-repository';
 import { LikeStatusForPostDocument } from '../../like-status-for-post/domain/domain-like-status-for-post';
 import { LikeStatus } from '../../../common/types';
+import { BlogRepository } from '../../blogs/repositories/blog-repository';
 
 @Injectable()
 /*@Injectable()-декоратор что данный клас
@@ -24,6 +25,7 @@ export class PostQueryRepository {
   constructor(
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
     protected likeStatusForPostRepository: LikeStatusForPostRepository,
+    protected blogRepository: BlogRepository,
   ) {}
 
   async getPosts(
@@ -218,6 +220,12 @@ export class PostQueryRepository {
     blogId: string,
     queryParams: QueryParamsInputModel,
   ) {
+    ///надо проверить существует ли такой blog
+
+    const blog = await this.blogRepository.findBlog(blogId);
+
+    if (!blog) return null;
+
     const { sortBy, sortDirection, pageNumber, pageSize } = queryParams;
 
     const sortDirectionValue = sortDirection === 'asc' ? 1 : -1;
