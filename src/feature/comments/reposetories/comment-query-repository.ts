@@ -7,12 +7,14 @@ import { QueryParamsInputModel } from '../../../common/pipes/query-params-input-
 import { LikeStatus } from '../../../common/types';
 import { LikeStatusForCommentDocument } from '../../like-status-for-comment/domain/domain-like-status-for-comment';
 import { LikeStatusForCommentRepository } from '../../like-status-for-comment/repositories/like-status-for-comment-repository';
+import { PostRepository } from '../../posts/repositories/post-repository';
 
 @Injectable()
 export class CommentQueryRepository {
   constructor(
     @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
     protected likeStatusForCommentRepository: LikeStatusForCommentRepository,
+    protected postRepository: PostRepository,
   ) {}
 
   async getComments(
@@ -20,6 +22,12 @@ export class CommentQueryRepository {
     postId: string,
     queryParams: QueryParamsInputModel,
   ) {
+    //проверить существует ли такой ПОСТ
+
+    const post = await this.postRepository.getPostById(postId);
+
+    if (!post) return null;
+
     const { sortBy, sortDirection, pageNumber, pageSize } = queryParams;
 
     const sortDirectionValue = sortDirection === 'asc' ? 1 : -1;
