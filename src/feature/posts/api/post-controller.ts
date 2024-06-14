@@ -47,12 +47,11 @@ export class PostsController {
     @Body() createPostInputModel: CreatePostInputModel,
     @Req() request: Request,
   ): Promise<PostWithLikesInfo | null> {
-    /* чтобы переиспользовать в этом обработчике метод
-     getPostById  ему нужна (userId)- она будет
-     в данном случае null но главное что удовлетворяю
-     метод значением-userId*/
-
     const userId: string | null = request['userId'];
+    /* чтобы переиспользовать в этом обработчике метод
+   getPostById  ему нужна (userId)- она будет
+   в данном случае null но главное что удовлетворяю
+   метод значением-userId*/
 
     /* создать новый пост  и вернуть данные этого поста и также
     внутри структуру данных(снулевыми значениями)  о лайках  к этому посту*/
