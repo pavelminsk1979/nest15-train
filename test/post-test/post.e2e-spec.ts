@@ -45,10 +45,11 @@ describe('tests for andpoint posts', () => {
       .post('/posts')
       .set('Authorization', `Basic ${loginPasswordBasic64}`)
       .send({
-        title: '',
+        title: '  ',
         shortDescription: 'shortDescriptionPost',
-        content: 'contentPost',
-        blogId: idBlog3,
+        content: '  ',
+        //blogId: idBlog3,
+        blogId: '666c4526947c71d1229ed6b3',
       })
       .expect(400);
     //console.log(res.body);
@@ -149,6 +150,10 @@ describe('tests for andpoint posts', () => {
       .set('Authorization', `Basic ${loginPasswordBasic64}`)
       .expect(204);
   });
+
+  ////////////////////////////////////////////
+
+  ///////////////////////////////////////////////////
 
   /* 
  

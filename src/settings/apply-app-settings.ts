@@ -5,11 +5,14 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ErrorResponseType, HttpExceptionFilter } from '../exeption-filter';
+import { useContainer } from 'class-validator';
+import { AppModule } from '../app.module';
 
 export const applyAppSettings = (app: INestApplication) => {
   /*без этой команды при деплое на ВЕРСЕЛ будут
   падать ошибки */
   app.enableCors();
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
   /*ДЛЯ СОЗДАНИЯ ГЛОБАЛЬНОГО ПАЙПА
   КОД В АРГУМЕНТЕ --это чтоб если pipe валидация
   не прошла то выводилась ошибка определенного

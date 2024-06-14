@@ -79,7 +79,7 @@ export class CommentQueryRepository {
     /* из массива коментариев получу массив коментарийАЙДИ*/
 
     const arrayCommentId = comments.map((e) => e._id.toString());
-
+    //console.log(arrayCommentId);
     /*из коллекции LikeStatusForComment
     достану все документы в  которых  имеются commentId
    из массива  arrayCommentsId*/
@@ -88,7 +88,7 @@ export class CommentQueryRepository {
       await this.likeStatusForCommentRepository.findAllDocumentsByArrayCommentId(
         arrayCommentId,
       );
-
+    //console.log(allLikeStatusDocumentsForSortComments);
     /*создаю массив c данными о коментариях и  с информацией о
      лайках к этому коментарию
     (он пойдет на фронтенд)

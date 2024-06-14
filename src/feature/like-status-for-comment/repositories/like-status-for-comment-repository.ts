@@ -29,7 +29,7 @@ export class LikeStatusForCommentRepository {
  и по этим айдишкам найдет все существующие документы*/
 
     return this.likeStatusModelForComment.find({
-      postId: { $in: arrayCommentId },
+      commentId: { $in: arrayCommentId },
     });
   }
 

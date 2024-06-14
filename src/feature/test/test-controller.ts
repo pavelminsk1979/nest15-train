@@ -5,6 +5,10 @@ import { Model } from 'mongoose';
 import { Blog, BlogDocument } from '../blogs/domains/domain-blog';
 import { User, UserDocument } from '../users/domains/domain-user';
 import { Comment, CommentDocument } from '../comments/domaims/domain-comment';
+import {
+  LikeStatusForComment,
+  LikeStatusForCommentDocument,
+} from '../like-status-for-comment/domain/domain-like-status-for-comment';
 
 @Controller('testing')
 export class TestController {
@@ -13,6 +17,8 @@ export class TestController {
     @InjectModel(Blog.name) private blogModel: Model<BlogDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
+    @InjectModel(LikeStatusForComment.name)
+    private LikeStatusForCommentModel: Model<LikeStatusForCommentDocument>,
   ) {}
 
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -22,6 +28,7 @@ export class TestController {
     await this.blogModel.deleteMany({});
     await this.userModel.deleteMany({});
     await this.commentModel.deleteMany({});
+    await this.LikeStatusForCommentModel.deleteMany({});
     return;
   }
 }

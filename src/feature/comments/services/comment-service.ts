@@ -126,7 +126,7 @@ export class CommentService {
         userId,
         commentId,
       );
-
+    //console.log(commentId);
     if (!document) {
       /*Если документа  нет тогда надо cоздать
       новый документ и добавить в базу*/

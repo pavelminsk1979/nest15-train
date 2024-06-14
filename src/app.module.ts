@@ -48,6 +48,7 @@ import {
 } from './feature/like-status-for-comment/domain/domain-like-status-for-comment';
 import { LikeStatusForCommentRepository } from './feature/like-status-for-comment/repositories/like-status-for-comment-repository';
 import { DataUserExtractorFromTokenGuard } from './common/guard/data-user-extractor-from-token-guard';
+import { BlogExistsConstraint } from './common/validators/blog-exists-constraint';
 
 dotenv.config();
 
@@ -214,6 +215,7 @@ dotenv.config();
     DataUserExtractorFromTokenGuard,
     LikeStatusForPostRepository,
     LikeStatusForCommentRepository,
+    BlogExistsConstraint,
   ],
 })
 /*export class AppModule {} в данном контексте
